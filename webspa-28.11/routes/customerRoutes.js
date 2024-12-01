@@ -1,30 +1,29 @@
 // routes/customerRoutes.js
-const express = require('express');
+const express = require("express");
 const {
   registerCustomer,
   loginCustomer,
   updateCustomer,
-  getCustomerById
-} = require('../controllers/customerController');  // Import controller
+  getCustomerById,
+} = require("../controllers/customerController"); // Import controller
 
 const router = express.Router();
 
 // Thêm route mặc định
-router.get('/', (req, res) => {
-    res.send('API khách hàng đang hoạt động!');
-  });
-  
+router.get("/", (req, res) => {
+  res.send("API khách hàng đang hoạt động!");
+});
 
 // Đăng ký khách hàng mới
-router.post('/register', registerCustomer);
+router.post("/register", registerCustomer);
 
 // Đăng nhập khách hàng
-router.post('/login', loginCustomer);
+router.post("/login", loginCustomer);
 
 // Cập nhật thông tin khách hàng
-router.put('/update/:id', updateCustomer);
+router.put("/update/:id", updateCustomer);
 
 // Lấy thông tin khách hàng
-router.get('/:id', getCustomerById);
+router.get("/:id", getCustomerById);
 
 module.exports = router;
