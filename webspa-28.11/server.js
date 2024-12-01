@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('./db');
 const customerRoutes = require('./routes/customerRoutes');
 const productRoutes = require('./routes/productRoutes'); 
-const cartRoutes = require('./routes/cartRoutes'); 
+const cartRoutes = require('./routes/cartRoutes');
+const orderRoutes = require('./routes/orderRoutes'); 
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -20,6 +21,9 @@ app.use('/api/products', productRoutes);
 
 // Đăng ký route giỏ hàng
 app.use('/api/cart', cartRoutes);
+
+// Tạo đơn hàng
+app.use('/api/orders', orderRoutes);
 
 // Chạy server
 app.listen(port, () => {
