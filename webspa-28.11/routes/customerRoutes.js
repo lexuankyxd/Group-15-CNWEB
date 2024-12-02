@@ -6,6 +6,7 @@ const {
   updateCustomer,
   getCustomerById,
 } = require("../controllers/customerController"); // Import controller
+const protect = require("../middleware/authMiddleware"); // Middleware bảo vệ route
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.post("/register", registerCustomer);
 router.post("/login", loginCustomer);
 
 // Cập nhật thông tin khách hàng
-router.put("/update/:id", updateCustomer);
+router.put("/update", protect, updateCustomer);
 
 // Lấy thông tin khách hàng
 router.get("/:id", getCustomerById);

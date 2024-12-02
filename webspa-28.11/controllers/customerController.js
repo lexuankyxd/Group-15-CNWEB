@@ -1,5 +1,5 @@
 // controllers/customerController.js
-const Customer = require("../models/Customer");
+const Customer = require("../models/customerModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
@@ -69,7 +69,7 @@ exports.updateCustomer = async (req, res) => {
   const { name, phone, address } = req.body;
   try {
     const updatedCustomer = await Customer.findByIdAndUpdate(
-      req.params.id,
+      req.user.id,
       { name, phone, address },
       { new: true },
     );

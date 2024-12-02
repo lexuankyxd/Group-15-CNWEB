@@ -25,32 +25,6 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// Lấy tất cả sản phẩm với phân trang
-exports.getAllProducts = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
-  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
-  const skip = (page - 1) * limit;
-
-  try {
-    const totalProducts = await Product.countDocuments();
-    const totalPages = Math.ceil(totalProducts / limit);
-
-    // Lấy các sản phẩm trong trang hiện tại
-    const products = await Product.find().skip(skip).limit(limit);
-
-    res.status(200).json({
-      message: "Danh sách sản phẩm",
-      products,
-      currentPage: page,
-      totalPages,
-      totalProducts,
-    });
-  } catch (error) {
-    console.error("Lỗi khi lấy sản phẩm:", error);
-    res.status(500).json({ message: "Lỗi hệ thống!" });
-  }
-};
-
 // Cập nhật sản phẩm
 exports.updateProduct = async (req, res) => {
   const { name, description, price, stock, image, category } = req.body;
@@ -89,6 +63,64 @@ exports.deleteProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Lỗi khi xóa sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi hệ thống!" });
+  }
+};
+
+//customer apis
+
+// Lấy tất cả sản phẩm với phân trang
+exports.getAllProducts = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
+  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
+  const skip = (page - 1) * limit;
+
+  try {
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    // Lấy các sản phẩm trong trang hiện tại
+    const products = await Product.find().skip(skip).limit(limit);
+
+    res.status(200).json({
+      message: "Danh sách sản phẩm",
+      products,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi hệ thống!" });
+  }
+};
+
+// Tìm sản phẩm theo từ khóa trong tên
+exports.findProducts = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
+  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
+  const skip = (page - 1) * limit;
+  const keywords = req.body.keywords.split(" ");
+  const regexPattern = `\\b(?:${keywords.join("|")})\\b`;
+  const regex = new RegExp(regexPattern, "i");
+  try {
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    const products = await Product.find({
+      name: { $regex: keywords.join("|"), $options: "i" },
+    })
+      .skip(skip)
+      .limit(limit);
+    res.status(200).json({
+      message: "Danh sách sản phẩm",
+      products,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy sản phẩm:", error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
   }
 };
