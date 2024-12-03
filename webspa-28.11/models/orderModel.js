@@ -30,8 +30,8 @@ const orderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Chờ xử lý", "Đang giao", "Hoàn thành", "Đã hủy"],
-    default: "Chờ xử lý",
+    enum: ["Chờ thanh toán", "Chờ xử lý", "Đang giao", "Hoàn thành", "Đã hủy"],
+    default: "Chờ thanh toán",
   },
   shippingAddress: {
     type: String,
@@ -39,12 +39,11 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
+    enum: ["Tiền mặt", "Chuyển khoản"],
     required: true,
   },
-  paymentStatus: {
+  paymentAccount: {
     type: String,
-    enum: ["Chưa thanh toán", "Đã thanh toán"],
-    default: "Chưa thanh toán",
   },
   createdAt: {
     type: Date,

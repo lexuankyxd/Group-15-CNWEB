@@ -5,15 +5,11 @@ const {
   loginCustomer,
   updateCustomer,
   getCustomerById,
+  getAllCustomers,
 } = require("../controllers/customerController"); // Import controller
-const protect = require("../middleware/authMiddleware"); // Middleware bảo vệ route
+const { protect, adminProtect } = require("../middleware/authMiddleware"); // Middleware bảo vệ route
 
 const router = express.Router();
-
-// Thêm route mặc định
-router.get("/", (req, res) => {
-  res.send("API khách hàng đang hoạt động!");
-});
 
 // Đăng ký khách hàng mới
 router.post("/register", registerCustomer);
@@ -27,4 +23,6 @@ router.put("/update", protect, updateCustomer);
 // Lấy thông tin khách hàng
 router.get("/:id", getCustomerById);
 
+// Lấy tất cả khách hàng trong csdl
+router.get("/", getAllCustomers);
 module.exports = router;

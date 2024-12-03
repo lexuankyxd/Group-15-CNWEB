@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 // Đăng ký khách hàng mới
-// controllers/customerController.js
+// controllers/adminController.js
 exports.registerAdmin = async (req, res) => {
   const { name, email, password, phone } = req.body;
 
@@ -53,10 +53,9 @@ exports.loginAdmin = async (req, res) => {
   }
 
   const token = jwt.sign(
-    { role: "admin" },
-    { id: customer._id },
+    { id: admin._id, role: "admin" },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" }, // Token sẽ hết hạn sau 1 giờ
+    { expiresIn: "3h" }, // Token sẽ hết hạn sau 3 giờ
   );
   res.status(200).json({
     message: "Đăng nhập thành công!",
@@ -68,29 +67,55 @@ exports.loginAdmin = async (req, res) => {
 exports.updateAdmin = async (req, res) => {
   const { name, phone } = req.body;
   try {
-    const updatedCustomer = await Customer.findByIdAndUpdate(
+    const updatedAdmin = await Admin.findByIdAndUpdate(
       req.user.id,
-      { name, phone, address },
+      { name, phone },
       { new: true },
     );
     res.status(200).json({
       message: "Cập nhật thông tin thành công!",
-      customer: updatedCustomer,
+      customer: updatedAdmin,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
   }
 };
 
 // Lấy thông tin khách hàng
-exports.getCustomerById = async (req, res) => {
+exports.getAdminById = async (req, res) => {
   try {
-    const customer = await Customer.findById(req.params.id);
-    if (!customer) {
-      return res.status(404).json({ message: "Khách hàng không tồn tại!" });
+    const admin = await Admin.findById(req.params.id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin không tồn tại!" });
     }
-    res.status(200).json(customer);
+    res.status(200).json(admin);
   } catch (error) {
+    res.status(500).json({ message: "Lỗi hệ thống!" });
+  }
+};
+
+exports.getAllAdmins = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
+  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
+  const skip = (page - 1) * limit;
+
+  try {
+    const totalAdmins = await Admin.countDocuments();
+    const totalPages = Math.ceil(totalAdmins / limit);
+
+    // Lấy các sản phẩm trong trang hiện tại
+    const admins = await Admin.find().skip(skip).limit(limit);
+
+    res.status(200).json({
+      message: "Danh sách admin",
+      admins,
+      currentPage: page,
+      totalPages,
+      totalAdmins,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy admin:", error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
   }
 };

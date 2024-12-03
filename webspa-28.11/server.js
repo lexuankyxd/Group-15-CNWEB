@@ -3,9 +3,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("./db");
 const customerRoutes = require("./routes/customerRoutes");
+const adminRoutes = require("./routes/adminRoutes.js");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const orderProcessingRoutes = require("./routes/orderProcessingRoutes.js");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -24,6 +26,9 @@ app.use(bodyParser.json());
 // Sử dụng các route cho khách hàng
 app.use("/api/customers", customerRoutes);
 
+// Sử dụng các route cho admin
+app.use("/api/admins", adminRoutes);
+
 // Sử dụng các route cho sản phẩm
 app.use("/api/products", productRoutes);
 
@@ -32,6 +37,9 @@ app.use("/api/cart", cartRoutes);
 
 // Tạo đơn hàng
 app.use("/api/orders", orderRoutes);
+
+// Xử lý đơn hàng
+app.use("/api/orderProcessing", orderProcessingRoutes);
 
 // Chạy server
 app.listen(port, () => {

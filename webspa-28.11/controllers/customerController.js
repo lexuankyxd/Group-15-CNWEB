@@ -56,7 +56,7 @@ exports.loginCustomer = async (req, res) => {
   const token = jwt.sign(
     { id: customer._id },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" }, // Token sẽ hết hạn sau 1 giờ
+    { expiresIn: "3h" }, // Token sẽ hết hạn sau 3 giờ
   );
   res.status(200).json({
     message: "Đăng nhập thành công!",
@@ -91,6 +91,31 @@ exports.getCustomerById = async (req, res) => {
     }
     res.status(200).json(customer);
   } catch (error) {
+    res.status(500).json({ message: "Lỗi hệ thống!" });
+  }
+};
+
+exports.getAllCustomers = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
+  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
+  const skip = (page - 1) * limit;
+
+  try {
+    const totalCustomers = await Customer.countDocuments();
+    const totalPages = Math.ceil(totalCustomers / limit);
+
+    // Lấy các sản phẩm trong trang hiện tại
+    const customers = await Customer.find().skip(skip).limit(limit);
+
+    res.status(200).json({
+      message: "Danh sách khách hàng",
+      customers,
+      currentPage: page,
+      totalPages,
+      totalCustomers,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy khách hàng:", error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
   }
 };

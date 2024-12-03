@@ -6,17 +6,18 @@ const {
   deleteProduct,
   findProducts,
 } = require("../controllers/productController");
+const { protect, adminProtect } = require("../middleware/authMiddleware"); // Middleware bảo vệ route
 
 const router = express.Router();
 
 // Route thêm sản phẩm mới
-router.post("/create", createProduct);
+router.post("/create", adminProtect, createProduct);
 
 // Route cập nhật sản phẩm
-router.put("/update/:id", updateProduct);
+router.put("/update/:id", adminProtect, updateProduct);
 
 // Route xóa sản phẩm
-router.delete("/delete/:id", deleteProduct);
+router.delete("/delete/:id", adminProtect, deleteProduct);
 
 // Route lấy tất cả sản phẩm với phân trang
 // Các tham số query: page (số trang), limit (số sản phẩm mỗi trang)
