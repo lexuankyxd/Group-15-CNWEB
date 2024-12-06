@@ -71,8 +71,8 @@ exports.deleteProduct = async (req, res) => {
 
 // Lấy tất cả sản phẩm với phân trang
 exports.getAllProducts = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
-  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
+  const page = parseInt(req.query.page) || 1; 
+  const limit = parseInt(req.query.limit) || 10; 
   const skip = (page - 1) * limit;
 
   try {
@@ -97,8 +97,8 @@ exports.getAllProducts = async (req, res) => {
 
 // Tìm sản phẩm theo từ khóa trong tên
 exports.findProducts = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
-  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
+  const page = parseInt(req.query.page) || 1; 
+  const limit = parseInt(req.query.limit) || 10; 
   const skip = (page - 1) * limit;
   const keywords = req.body.keywords.split(" ");
   const regexPattern = `\\b(?:${keywords.join("|")})\\b`;
@@ -121,6 +121,84 @@ exports.findProducts = async (req, res) => {
     });
   } catch (error) {
     console.error("Lỗi khi lấy sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi hệ thống!" });
+  }
+};
+
+// Tìm sản phẩm theo category và mức giá
+exports.findProductsByCategory = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; 
+  const limit = parseInt(req.query.limit) || 10; 
+  const skip = (page - 1) * limit;
+
+  const category = req.query.category; 
+  const priceRange = req.query.priceRange; 
+
+  if (!category) {
+    return res.status(400).json({ message: "Category is required!" });
+  }
+
+  let priceFilter = {};
+
+  // Xử lý lọc theo mức giá
+  if (priceRange) {
+    switch (priceRange) {
+      case "under1m":
+        priceFilter = { price: { $lt: 1000000 } };
+        break;
+      case "1mTo3m":
+        priceFilter = { price: { $gte: 1000000, $lt: 3000000 } }; 
+        break;
+      case "3mTo10m":
+        priceFilter = { price: { $gte: 3000000, $lt: 10000000 } }; 
+      case "10mTo20m":
+        priceFilter = { price: { $gte: 10000000, $lt: 20000000 } }; 
+        break;
+      case "above20m":
+        priceFilter = { price: { $gte: 20000000 } }; 
+        break;
+      default:
+        priceFilter = {}; 
+    }
+  }
+
+  try {
+    // Tính tổng số sản phẩm thỏa mãn các điều kiện
+    const totalProducts = await Product.countDocuments({
+      category: category,
+      ...priceFilter,
+    });
+
+    // Nếu không có sản phẩm thỏa mãn, trả về thông báo
+    if (totalProducts === 0) {
+      return res.status(200).json({
+        message: "Không có sản phẩm thỏa mãn yêu cầu tìm kiếm.",
+        products: [],
+        currentPage: page,
+        totalPages: 0,
+        totalProducts: 0,
+      });
+    }
+
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    // Lấy các sản phẩm trong category và mức giá tương ứng
+    const products = await Product.find({
+      category: category,
+      ...priceFilter,
+    })
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      message: "Danh sách sản phẩm theo category và mức giá",
+      products,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy sản phẩm theo category và mức giá:", error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
   }
 };
