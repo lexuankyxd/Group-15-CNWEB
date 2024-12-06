@@ -5,6 +5,7 @@ const {
   updateProduct,
   deleteProduct,
   findProducts,
+  findProductsByCategory,
 } = require("../controllers/productController");
 const { protect, adminProtect } = require("../middleware/authMiddleware"); // Middleware bảo vệ route
 
@@ -26,4 +27,8 @@ router.get("/", getAllProducts);
 // Route tìm theo từ khóa tất cả sản phẩm với phân trang
 // Các tham số query: page (số trang), limit (số sản phẩm mỗi trang)
 router.get("/findByName", findProducts);
+
+// Route tìm kiếm theo category và mức giá
+router.get("/category", findProductsByCategory);
+
 module.exports = router;
