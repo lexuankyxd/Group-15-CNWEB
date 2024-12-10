@@ -1,37 +1,36 @@
-// controllers/customerController.js
-const Customer = require("../models/customerModel");
+// controllers/adminController.js
+const Admin = require("../models/adminModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 // Đăng ký khách hàng mới
-// controllers/customerController.js
-exports.registerCustomer = async (req, res) => {
-  const { name, email, password, phone, address } = req.body;
+// controllers/adminController.js
+exports.registerAdmin = async (req, res) => {
+  const { name, email, password, phone } = req.body;
 
   // Kiểm tra dữ liệu
   console.log("Dữ liệu nhận được từ frontend:", req.body);
 
   // Kiểm tra xem khách hàng đã tồn tại chưa
   try {
-    const customerExists = await Customer.findOne({ email });
-    if (customerExists) {
+    const adminExists = await Admin.findOne({ email });
+    if (adminExists) {
       console.log("Email đã tồn tại:", email);
       return res.status(400).json({ message: "Email đã được đăng ký!" });
     }
 
     // Tạo khách hàng mới
-    const customer = new Customer({
+    const admin = new Admin({
       name,
       email,
       password,
       phone,
-      address,
     });
 
-    const savedCustomer = await customer.save();
+    const savedAdmin = await admin.save();
     res.status(201).json({
       message: "Đăng ký thành công!",
-      customer: savedCustomer,
+      admin: savedAdmin,
     });
   } catch (error) {
     console.error("Lỗi trong quá trình đăng ký:", error.message); // Log lỗi chi tiết
@@ -40,21 +39,21 @@ exports.registerCustomer = async (req, res) => {
 };
 
 // Đăng nhập khách hàng
-exports.loginCustomer = async (req, res) => {
+exports.loginAdmin = async (req, res) => {
   const { email, password } = req.body;
 
-  const customer = await Customer.findOne({ email });
-  if (!customer) {
+  const admin = await Admin.findOne({ email });
+  if (!admin) {
     return res.status(400).json({ message: "Email không tồn tại!" });
   }
 
-  const isMatch = await customer.matchPassword(password);
+  const isMatch = await admin.matchPassword(password);
   if (!isMatch) {
     return res.status(400).json({ message: "Mật khẩu không chính xác!" });
   }
 
   const token = jwt.sign(
-    { id: customer._id },
+    { id: admin._id, role: "admin" },
     process.env.JWT_SECRET,
     { expiresIn: "3h" }, // Token sẽ hết hạn sau 3 giờ
   );
@@ -65,57 +64,58 @@ exports.loginCustomer = async (req, res) => {
 };
 
 // Cập nhật thông tin khách hàng
-exports.updateCustomer = async (req, res) => {
-  const { name, phone, address } = req.body;
+exports.updateAdmin = async (req, res) => {
+  const { name, phone } = req.body;
   try {
-    const updatedCustomer = await Customer.findByIdAndUpdate(
+    const updatedAdmin = await Admin.findByIdAndUpdate(
       req.user.id,
-      { name, phone, address },
+      { name, phone },
       { new: true },
     );
     res.status(200).json({
       message: "Cập nhật thông tin thành công!",
-      customer: updatedCustomer,
+      customer: updatedAdmin,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
   }
 };
 
 // Lấy thông tin khách hàng
-exports.getCustomerById = async (req, res) => {
+exports.getAdminById = async (req, res) => {
   try {
-    const customer = await Customer.findById(req.params.id);
-    if (!customer) {
-      return res.status(404).json({ message: "Khách hàng không tồn tại!" });
+    const admin = await Admin.findById(req.params.id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin không tồn tại!" });
     }
-    res.status(200).json(customer);
+    res.status(200).json(admin);
   } catch (error) {
     res.status(500).json({ message: "Lỗi hệ thống!" });
   }
 };
 
-exports.getAllCustomers = async (req, res) => {
+exports.getAllAdmins = async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
   const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
   const skip = (page - 1) * limit;
 
   try {
-    const totalCustomers = await Customer.countDocuments();
-    const totalPages = Math.ceil(totalCustomers / limit);
+    const totalAdmins = await Admin.countDocuments();
+    const totalPages = Math.ceil(totalAdmins / limit);
 
     // Lấy các sản phẩm trong trang hiện tại
-    const customers = await Customer.find().skip(skip).limit(limit);
+    const admins = await Admin.find().skip(skip).limit(limit);
 
     res.status(200).json({
-      message: "Danh sách khách hàng",
-      customers,
+      message: "Danh sách admin",
+      admins,
       currentPage: page,
       totalPages,
-      totalCustomers,
+      totalAdmins,
     });
   } catch (error) {
-    console.error("Lỗi khi lấy khách hàng:", error);
+    console.error("Lỗi khi lấy admin:", error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
   }
 };

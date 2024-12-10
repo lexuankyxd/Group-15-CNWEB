@@ -1,28 +1,27 @@
-const express = require('express');
+const express = require("express");
 const {
   createOrder,
-  getOrders,
-  getOrderDetails,
-  updateOrderStatus,
-  deleteOrder
-} = require('../controllers/orderController');
-const protect = require('../middleware/authMiddleware');  // Middleware xác thực người dùng
+  getUserOrders,
+  getUserOrderDetails,
+  getAllOrders,
+  cancelOrder,
+} = require("../controllers/orderController");
+const { protect, adminProtect } = require("../middleware/authMiddleware"); // Middleware bảo vệ route
 
 const router = express.Router();
 
 // Route tạo đơn hàng
-router.post('/', protect, createOrder);
+router.post("/createOrder", protect, createOrder);
 
 // Route lấy danh sách đơn hàng của người dùng
-router.get('/', protect, getOrders);
+router.get("/", adminProtect, getAllOrders);
+
+// Route lấy danh sách đơn hàng của người dùng
+router.get("/userOrders", protect, getUserOrders);
 
 // Route lấy chi tiết đơn hàng
-router.get('/:orderId', protect, getOrderDetails);
+router.get("/userOrderDetails/:orderId", protect, getUserOrderDetails);
 
-// Route cập nhật trạng thái đơn hàng
-router.put('/:orderId/status', protect, updateOrderStatus);
-
-// Route xóa đơn hàng
-router.delete('/:orderId', protect, deleteOrder);
-
+// Route hủy đơn hàng
+router.put("/cancelOrder", protect, cancelOrder);
 module.exports = router;
