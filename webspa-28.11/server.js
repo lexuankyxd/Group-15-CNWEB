@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require('cors');
 const bodyParser = require("body-parser");
 const mongoose = require("./db");
 const customerRoutes = require("./routes/customerRoutes");
@@ -10,16 +11,16 @@ const orderRoutes = require("./routes/orderRoutes");
 const orderProcessingRoutes = require("./routes/orderProcessingRoutes.js");
 
 const app = express();
+
+const corsOptions = {
+  origin: 'http://localhost:3000', // Allow only your frontend domain
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // Added 'Authorization' to allowed headers
+  credentials: true, // Allow credentials like cookies or authorization headers
+};
+
+app.use(cors(corsOptions));
 const port = process.env.PORT || 5000;
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // Allows all origins
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS",
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  next();
-});
 // Middleware
 app.use(bodyParser.json());
 
