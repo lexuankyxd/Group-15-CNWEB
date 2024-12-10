@@ -24,6 +24,7 @@ export interface Order {
   status: 'Chờ thanh toán' | 'Chờ xử lý' | 'Đang giao' | 'Hoàn thành' | 'Đã hủy';
   shippingAddress: string;
   paymentMethod: 'Tiền mặt' | 'Chuyển khoản';
+  paymentStatus: 'Chưa thanh toán' | 'Đã thanh toán';
   paymentAccount?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -110,4 +111,11 @@ export interface RegisterData {
 export interface LoginData {
   email: string;
   password: string;
+}
+
+export interface PaginatedCustomerResponse {
+  customers: Customer[];
+  currentPage: number;
+  totalPages: number;
+  totalCustomers: number;
 }
