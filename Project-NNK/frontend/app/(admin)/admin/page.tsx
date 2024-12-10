@@ -5,26 +5,41 @@ import TitleHeader from "../components/title-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CreditCard, Package, Loader2 } from "lucide-react";
 import { useQueries } from "@tanstack/react-query";
-import { adminApi } from "@/lib/apiCalls";
+import { useAuth } from "@/app/utils/authContext";
+import { createProtectedApi, publicApi } from "@/lib/apiCalls";
 
 const AdminPage = () => {
+  const { user } = useAuth();
+  const protectedApi = user ? createProtectedApi(user.token) : null;
+
   const [orderQuery, productQuery] = useQueries({
     queries: [
       {
-        queryKey: ["Sales count"],
+        queryKey: ["admin-orders"],
         queryFn: async () => {
-          const data = await adminApi.getAllOrders();
-          return data;
+          if (!protectedApi) throw new Error("Not authenticated");
+          const response = await protectedApi.admin.getAllOrders();
+          // Calculate total sales from order items
+          const totalSales = response.orders.reduce((acc: number, order: any) => {
+            const orderTotal = order.items.reduce((itemAcc: number, item: any) => 
+              itemAcc + (item.price * item.quantity), 0);
+            return acc + orderTotal;
+          }, 0);
+          return totalSales;
         },
+        enabled: !!protectedApi
       },
       {
-        queryKey: ["Stock products"],
+        queryKey: ["admin-products"],
         queryFn: async () => {
-          const data = await adminApi.getAllProducts();
-          return data.products;
-        },
-      },
-    ],
+          const response = await publicApi.getAllProducts();
+          // Calculate total stock from all products
+          const totalStock = response.products.reduce((acc: number, product: any) => 
+            acc + (product.stock || 0), 0);
+          return totalStock;
+        }
+      }
+    ]
   });
 
   if (orderQuery.isError || productQuery.isError) {
@@ -37,7 +52,7 @@ const AdminPage = () => {
       <div className="grid gap-4 grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sales</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="pl-6 pb-3">
@@ -45,7 +60,7 @@ const AdminPage = () => {
               {orderQuery.isLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
-                `+${orderQuery?.data?.length || 0}`
+                `$${orderQuery.data?.toFixed(2) || "0.00"}`
               )}
             </div>
           </CardContent>
@@ -60,7 +75,7 @@ const AdminPage = () => {
               {productQuery.isLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
               ) : (
-                productQuery?.data?.length || 0
+                productQuery.data
               )}
             </div>
           </CardContent>
