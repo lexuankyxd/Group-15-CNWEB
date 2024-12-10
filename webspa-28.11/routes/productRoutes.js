@@ -2,6 +2,7 @@ const express = require("express");
 const {
   createProduct,
   getAllProducts,
+  getProductById,
   updateProduct,
   deleteProduct,
   findProducts,
@@ -24,11 +25,15 @@ router.delete("/delete/:id", adminProtect, deleteProduct);
 // Các tham số query: page (số trang), limit (số sản phẩm mỗi trang)
 router.get("/", getAllProducts);
 
+// Route tìm kiếm theo category và mức giá
+router.get("/category", findProductsByCategory);
+
+router.get('/:id', getProductById);
+
 // Route tìm theo từ khóa tất cả sản phẩm với phân trang
 // Các tham số query: page (số trang), limit (số sản phẩm mỗi trang)
 router.get("/findByName", findProducts);
 
-// Route tìm kiếm theo category và mức giá
-router.get("/category", findProductsByCategory);
+
 
 module.exports = router;

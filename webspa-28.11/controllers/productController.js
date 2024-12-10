@@ -95,6 +95,25 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+exports.getProductById = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
+    }
+
+    res.status(200).json({
+      message: "Sản phẩm đã được tìm thấy!",
+      product: product,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy sản phẩm:", error);
+    res.status(500).json({ message: "Lỗi hệ thống!" });
+  }
+};
+
 // Tìm sản phẩm theo từ khóa trong tên
 exports.findProducts = async (req, res) => {
   const page = parseInt(req.query.page) || 1; 
