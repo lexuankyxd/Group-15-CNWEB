@@ -58,33 +58,32 @@ exports.createOrder = async (req, res) => {
 
 //Lấy danh sách đơn hàng của người dùng
 exports.getUserOrders = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
-  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
-  const skip = (page - 1) * limit;
-  const userId = req.user.id; // Lấy userId từ middleware xác thực
-
   try {
-    const orders = await Order.find({ userId: userId }).skip(skip).limit(limit);
-    const totalOrders = orders.length;
-    const totalPages = Math.ceil(totalOrders / limit);
-
-    // Lấy các đơn hàng trong trang hiện tại
-
-    res.status(200).json({
-      message: "Danh sách đơn hàng",
-      orders,
-      currentPage: page,
-      totalPages,
-      totalOrders,
-    });
-    if (orders.length === 0) {
-      return res.status(404).json({ message: "Không có đơn hàng nào." });
+    const userId = req.user.id;
+    // Changed 'user' to 'userId' to match the schema field
+    const orders = await Order.find({ userId: userId })
+      .sort({ createdAt: -1 }) // Sort by newest first
+      .populate('items.productId', 'name price image'); // Populate product details if needed
+    
+    if (!orders) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đơn hàng nào."
+      });
     }
+
+    return res.status(200).json({
+      success: true,
+      orders: orders
+    });
+
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "Lỗi hệ thống khi lấy danh sách đơn hàng!" });
+    console.error('Error in getUserOrders:', error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy danh sách đơn hàng.",
+      error: error.message
+    });
   }
 };
 
@@ -116,7 +115,7 @@ exports.getUserOrderDetails = async (req, res) => {
 // Lấy tất cả đơn hàng
 exports.getAllOrders = async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
-  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
+  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 s��n phẩm
   const skip = (page - 1) * limit;
 
   try {
@@ -157,15 +156,16 @@ exports.cancelOrder = async (req, res) => {
     }
 
     if (["Đang giao", "Hoàn thành", "Đã hủy"].includes(order.status)) {
-      return res
-        .status("200")
-        .json("Quá muộn để hủy hàng hoặc đơn đã được hủy!");
+      return res.status(200).json({
+        message: "Quá muộn để hủy hàng hoặc đơn đã được hủy!",
+      });
     }
 
-    if (order.status == "Chờ xử lý" && order.paymentMethod == "Chuyển khoản")
-      refundOrder(orderId);
+    if (order.status == "Chờ xử lý" && order.paymentMethod == "Chuyển khoản") {
+      await refundOrder(orderId);
+    }
     order.status = "Đã hủy";
-    order.save();
+    await order.save();
     res.status(200).json({
       message: "Đơn hàng đã được hủy!",
     });
