@@ -242,8 +242,12 @@ export const createProtectedApi = (token: string) => {
     // Admin specific operations
     admin: {
       getAllOrders: async () => {
-        const res = await api.get('/orders');
-        return res.data;
+        try {
+          const res = await api.get('/orders/');
+          return res.data;
+        } catch (error) {
+          throw handleApiError(error);
+        }
       },
 
       updateOrderStatus: async (orderId: string, status: string) => {
@@ -283,6 +287,16 @@ export const createProtectedApi = (token: string) => {
 
       getAdminById: async (id: string) => {
         const res = await api.get(`/admins/${id}`);
+        return res.data;
+      },
+
+      getAllCustomers: async (page = 1, limit = 10) => {
+        const res = await api.get(`/customers?page=${page}&limit=${limit}`);
+        return res.data;
+      },
+
+      deleteCustomer: async (id: string) => {
+        const res = await api.delete(`/customers/${id}`);
         return res.data;
       }
     }
