@@ -1,5 +1,7 @@
 "use client";
 import TitleHeader from "@/app/(admin)/components/title-header";
+import { useAuth } from "@/app/utils/authContext";
+import { createProtectedApi } from "@/lib/apiCalls";
 import axios from "axios";
 import { useState } from "react";
 import Table from "@mui/material/Table";
@@ -25,25 +27,29 @@ type CustomersResponse = {
   totalCustomers: number;
 };
 
+const USERS_PER_PAGE = 10;
+
 const UserTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 5;
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { error, data, isLoading } = useQuery({
+  const { error, data, isLoading } = useQuery<CustomersResponse>({
     queryKey: ["customers", currentPage],
     queryFn: async () => {
-      const res = await axios.get<CustomersResponse>(
-        `/api/customers?page=${currentPage}&limit=${productsPerPage}`
-      );
-      return res.data;
+      if (!user?.token) throw new Error('Unauthorized');
+      const api = createProtectedApi(user.token);
+      return api.admin.getAllCustomers(currentPage, USERS_PER_PAGE);
     },
+    keepPreviousData: true
   });
 
   const deleteUser = async (id: string) => {
     try {
-      await axios.delete(`/api/customers/${id}`);
-      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      if (!user?.token) throw new Error('Unauthorized');
+      const api = createProtectedApi(user.token);
+      await api.admin.deleteCustomer(id);
+      await queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast.success("User deleted successfully");
     } catch (error) {
       toast.error("Error deleting user");
@@ -68,7 +74,7 @@ const UserTable = () => {
         title="Manage Users"
         description="Manage customers"
         url="/admin/users/new"
-        count={data?.totalCustomers}
+        count={data?.totalCustomers || 0}
       />
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -120,7 +126,7 @@ const UserTable = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      {data && (
+      {data && data.totalPages > 1 && (
         <ReactPaginate
           previousLabel={"Previous"}
           nextLabel={"Next"}
@@ -132,9 +138,9 @@ const UserTable = () => {
           containerClassName={"pagination flex space-x-2 justify-end mt-4"}
           previousLinkClassName={"bg-neutral-800 px-4 py-2 rounded text-white"}
           nextLinkClassName={"bg-neutral-800 px-4 py-2 rounded text-white"}
+          pageLinkClassName={"bg-neutral-800 px-4 py-2 rounded text-white"}
           disabledClassName={"opacity-50 cursor-not-allowed"}
-          activeClassName={"bg-blue-700"}
-          pageClassName="hidden"
+          activeClassName={"!bg-blue-700"}
         />
       )}
     </>

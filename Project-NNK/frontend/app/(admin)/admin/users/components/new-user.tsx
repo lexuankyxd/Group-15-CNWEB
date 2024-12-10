@@ -7,13 +7,16 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "@/app/utils/authContext";
+import { createProtectedApi } from "@/lib/apiCalls";
 
 type CustomerFormData = Omit<Customer, '_id' | 'createdAt' | 'updatedAt'>;
 
 const NewCustomer = () => {
   const router = useRouter();
   const params = useParams();
-  const customerId = params.customerId as string;
+  const { user } = useAuth();
+  const customerId = params.userId as string;
 
   const isEditMode = !!customerId;
   const initialState: CustomerFormData = {
@@ -27,11 +30,12 @@ const NewCustomer = () => {
   const [formData, setFormData] = useState<CustomerFormData>(initialState);
   const [errors, setErrors] = useState<Partial<CustomerFormData>>({});
 
-  useQuery({
+  const { data: customerData } = useQuery({
     queryKey: ["getCustomer", customerId],
     queryFn: async () => {
-      if (!isEditMode) return;
-      const { data } = await axios.get(`/api/customers/${customerId}`);
+      if (!isEditMode || !user?.token) return null;
+      const api = createProtectedApi(user.token);
+      const data = await api.admin.getCustomerById(customerId);
       setFormData({
         name: data.name,
         email: data.email,
@@ -41,11 +45,15 @@ const NewCustomer = () => {
       });
       return data;
     },
-    enabled: isEditMode,
+    enabled: isEditMode && !!user?.token,
   });
 
   const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!user?.token) {
+      toast.error("Unauthorized");
+      return;
+    }
 
     setErrors({});
 
@@ -66,17 +74,20 @@ const NewCustomer = () => {
     }
 
     try {
+      const api = createProtectedApi(user.token);
+      
       if (isEditMode) {
-        await axios.put(`/api/customers/${customerId}`, formData);
-        toast.success("User successfully updated.");
+        await api.admin.updateCustomer(customerId, formData);
+        toast.success("User updated successfully");
       } else {
-        await axios.post("/api/customers", formData);
-        toast.success("User successfully created.");
+        await api.admin.createCustomer(formData);
+        toast.success("User created successfully");
       }
+      
       router.push("/admin/users");
     } catch (error) {
-      console.error("Error saving user:", error);
-      toast.error("Something went wrong.");
+      console.error("Error:", error);
+      toast.error("Operation failed");
     }
   };
 

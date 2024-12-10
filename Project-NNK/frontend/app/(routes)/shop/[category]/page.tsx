@@ -34,8 +34,6 @@ const CategoryPage = () => {
         const { products, total, currentPage } = await publicApi.getCategoryProducts(
           categoryPath,
           { 
-            page: Number(pageValue) || 1,
-            limit: 10,
             priceRange: priceRangeValue as string 
           }
         );
