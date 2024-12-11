@@ -155,7 +155,7 @@ export const createProtectedApi = (token: string) => {
       if (error.response?.status === 401) {
         // Clear local storage and trigger logout
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        window.location.href = '/customer-sign-in';
       }
       return Promise.reject(error);
     }
