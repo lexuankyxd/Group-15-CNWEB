@@ -11,20 +11,57 @@ import { createProtectedApi } from "@/lib/apiCalls";
 import { Order } from "@/types";
 import { toast } from "react-hot-toast";
 
+const StatusBadge = ({ status }: { status: Order['status'] }) => {
+  const getStatusStyles = () => {
+    switch (status) {
+      case 'Chờ thanh toán':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Chờ xử lý':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'Đang giao':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'Hoàn thành':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'Đã hủy':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  return (
+    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyles()}`}>
+      {status}
+    </span>
+  );
+};
+
+const PaymentStatusBadge = ({ status }: { status: Order['paymentStatus'] }) => {
+  const styles = status === 'Đã thanh toán'
+    ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+    : 'bg-amber-100 text-amber-800 border-amber-200';
+
+  return (
+    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${styles}`}>
+      {status}
+    </span>
+  );
+};
+
 const TableOrders = () => {
   const [currentPage, setCurrentPage] = useState(0);
-  const productsPerPage = 5;
+  const odersPerPage = 10;
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const protectedApi = user ? createProtectedApi(user.token) : null;
 
-  const { data, isLoading, error } = useQuery<Order[]>({
+  const { data, isLoading, error } = useQuery<{ message: string, orders: Order[] }>({
     queryKey: ["orders"],
     queryFn: async () => {
       if (!protectedApi) throw new Error("Not authenticated");
-      const data = await protectedApi.admin.getAllOrders();
-      return sortByDate(data);
+      const response = await protectedApi.admin.getAllOrders();
+      return response;
     },
     enabled: !!protectedApi
   });
@@ -43,8 +80,9 @@ const TableOrders = () => {
     }
   });
 
-  const offset = currentPage * productsPerPage;
-  const currentProducts = data?.slice(offset, offset + productsPerPage);
+  const offset = currentPage * odersPerPage;
+  const orders = data?.orders || [];
+  const currentProducts = orders.slice(offset, offset + odersPerPage);
 
   const handlePageClick = (selectedPage: { selected: number }) => {
     setCurrentPage(selectedPage.selected);
@@ -57,28 +95,41 @@ const TableOrders = () => {
     <>
       <TitleHeader
         title="Orders"
-        count={data?.length}
+        count={orders.length}
         description="Manage orders for your store"
       />
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} className="shadow-md">
         <Table sx={{ minWidth: 650 }} aria-label="orders table">
           <TableHead>
             <TableRow>
               <TableCell>Products</TableCell>
               <TableCell>Total Price</TableCell>
               <TableCell>Address</TableCell>
-              <TableCell>Payment</TableCell>
-              <TableCell>Status</TableCell>
+              <TableCell>Payment Method</TableCell>
+              <TableCell>Payment Status</TableCell>
+              <TableCell>Order Status</TableCell>
               <TableCell>Date</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {currentProducts?.map((order) => (
-              <TableRow key={order._id}>
+              <TableRow 
+                key={order._id}
+                className="hover:bg-gray-50"
+              >
                 <TableCell>{order.items.length} items</TableCell>
-                <TableCell>${order.totalPrice}</TableCell>
+                <TableCell className="font-medium">
+                  ${order.totalPrice.toLocaleString()}
+                </TableCell>
                 <TableCell>{order.shippingAddress}</TableCell>
-                <TableCell>{order.paymentMethod}</TableCell>
+                <TableCell>
+                  <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-sm font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                    {order.paymentMethod}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <PaymentStatusBadge status={order.paymentStatus} />
+                </TableCell>
                 <TableCell>
                   <Select
                     value={order.status}
@@ -87,12 +138,25 @@ const TableOrders = () => {
                       status: e.target.value as Order['status']
                     })}
                     size="small"
+                    className="min-w-[180px]"
+                    renderValue={(value) => <StatusBadge status={value as Order['status']} />}
+                    sx={{ boxShadow: 'none', '.MuiOutlinedInput-notchedOutline': { border: 0 } }}
                   >
-                    <MenuItem value="Chờ thanh toán">Chờ thanh toán</MenuItem>
-                    <MenuItem value="Chờ xử lý">Chờ xử lý</MenuItem>
-                    <MenuItem value="Đang giao">Đang giao</MenuItem>
-                    <MenuItem value="Hoàn thành">Hoàn thành</MenuItem>
-                    <MenuItem value="Đã hủy">Đã hủy</MenuItem>
+                    <MenuItem value="Chờ thanh toán">
+                      <StatusBadge status="Chờ thanh toán" />
+                    </MenuItem>
+                    <MenuItem value="Chờ xử lý">
+                      <StatusBadge status="Chờ xử lý" />
+                    </MenuItem>
+                    <MenuItem value="Đang giao">
+                      <StatusBadge status="Đang giao" />
+                    </MenuItem>
+                    <MenuItem value="Hoàn thành">
+                      <StatusBadge status="Hoàn thành" />
+                    </MenuItem>
+                    <MenuItem value="Đã hủy">
+                      <StatusBadge status="Đã hủy" />
+                    </MenuItem>
                   </Select>
                 </TableCell>
                 <TableCell>{formatDate(new Date(order.createdAt).toISOString())}</TableCell>
@@ -101,11 +165,11 @@ const TableOrders = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      {data && (
+      {orders.length > 0 && (
         <ReactPaginate
           previousLabel={"Previous"}
           nextLabel={"Next"}
-          pageCount={Math.ceil(data?.length / productsPerPage)}
+          pageCount={Math.ceil(orders.length / odersPerPage)}
           marginPagesDisplayed={2}
           pageRangeDisplayed={5}
           onPageChange={handlePageClick}

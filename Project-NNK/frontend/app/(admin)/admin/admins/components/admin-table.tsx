@@ -18,41 +18,40 @@ import Link from "next/link";
 import Spinner from "@/components/Spinner";
 import ReactPaginate from "react-paginate";
 import toast from "react-hot-toast";
-import { Customer } from "@/types";
+import { Admin } from "@/types";
 
-type CustomersResponse = {
-  customers: Customer[];
+type AdminsResponse = {
+  Admins: Admin[];
   currentPage: number;
   totalPages: number;
-  totalCustomers: number;
+  totalAdmins: number;
 };
 
 const USERS_PER_PAGE = 10;
 
-const UserTable = () => {
+const AdminTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { error, data, isLoading } = useQuery<CustomersResponse>({
-    queryKey: ["customers", currentPage],
+  const { error, data, isLoading } = useQuery({
+    queryKey: ["admins", currentPage],
     queryFn: async () => {
       if (!user?.token) throw new Error('Unauthorized');
       const api = createProtectedApi(user.token);
-      return api.admin.getAllCustomers(currentPage, USERS_PER_PAGE);
-    },
-    keepPreviousData: true
+      return api.admin.getAllAdmins();
+    }
   });
 
-  const deleteUser = async (id: string) => {
+  const deleteAdmin = async (id: string) => {
     try {
       if (!user?.token) throw new Error('Unauthorized');
       const api = createProtectedApi(user.token);
-      await api.admin.deleteCustomer(id);
-      await queryClient.invalidateQueries({ queryKey: ["customers"] });
-      toast.success("User deleted successfully");
+      await api.admin.deleteAdmin(id);
+      await queryClient.invalidateQueries({ queryKey: ["admins"] });
+      toast.success("Admin deleted successfully");
     } catch (error) {
-      toast.error("Error deleting user");
+      toast.error("Error deleting admin");
     }
   };
 
@@ -71,10 +70,10 @@ const UserTable = () => {
   return (
     <>
       <TitleHeader
-        title="Manage Users"
-        description="Manage customers"
-        url="/admin/users/new"
-        count={data?.totalCustomers || 0}
+        title="Manage Admins"
+        description="Manage administrator accounts"
+        url="/admin/admins/new"
+        count={data?.totalAdmins || 0}
       />
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -90,9 +89,6 @@ const UserTable = () => {
                 <p className="text-gray-700">Phone</p>
               </TableCell>
               <TableCell align="center">
-                <p className="text-gray-700">Address</p>
-              </TableCell>
-              <TableCell align="center">
                 <p className="text-gray-700">Date</p>
               </TableCell>
               <TableCell align="center">
@@ -101,23 +97,22 @@ const UserTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data?.customers.map((customer) => (
+            {data?.admins.map((admin) => (
               <TableRow
-                key={customer._id}
+                key={admin._id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell>{customer.name}</TableCell>
-                <TableCell align="center">{customer.email}</TableCell>
-                <TableCell align="center">{customer.phone || "N/A"}</TableCell>
-                <TableCell align="center">{customer.address || "N/A"}</TableCell>
+                <TableCell>{admin.name}</TableCell>
+                <TableCell align="center">{admin.email}</TableCell>
+                <TableCell align="center">{admin.phone || "N/A"}</TableCell>
                 <TableCell align="center">
-                  {customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : "N/A"}
+                  {admin.createdAt ? new Date(admin.createdAt).toLocaleDateString() : "N/A"}
                 </TableCell>
                 <TableCell align="center">
-                  <button onClick={() => deleteUser(customer._id)}>
+                  <button onClick={() => deleteAdmin(admin._id)}>
                     <DeleteIcon className="text-red-600" />
                   </button>
-                  <Link href={`/admin/users/edit/${customer._id}`}>
+                  <Link href={`/admin/admins/edit/${admin._id}`}>
                     <EditIcon />
                   </Link>
                 </TableCell>
@@ -126,25 +121,8 @@ const UserTable = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      {data && data.totalPages > 1 && (
-        <ReactPaginate
-          previousLabel={"Previous"}
-          nextLabel={"Next"}
-          breakLabel={"..."}
-          pageCount={data.totalPages}
-          marginPagesDisplayed={2}
-          pageRangeDisplayed={5}
-          onPageChange={handlePageClick}
-          containerClassName={"pagination flex space-x-2 justify-end mt-4"}
-          previousLinkClassName={"bg-neutral-800 px-4 py-2 rounded text-white"}
-          nextLinkClassName={"bg-neutral-800 px-4 py-2 rounded text-white"}
-          pageLinkClassName={"bg-neutral-800 px-4 py-2 rounded text-white"}
-          disabledClassName={"opacity-50 cursor-not-allowed"}
-          activeClassName={"!bg-blue-700"}
-        />
-      )}
     </>
   );
 };
 
-export default UserTable;
+export default AdminTable;

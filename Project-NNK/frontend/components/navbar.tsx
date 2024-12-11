@@ -31,7 +31,15 @@ const NavBar = () => {
             <NavItem />
           </MobileSidebar>
           <div className="flex items-center max-md:hidden">
-            <Logo />
+            <div className="flex items-center">
+              <Logo />
+              <Link 
+                href="/admin-sign-in" 
+                className="text-[10px] text-gray-300 hover:text-gray-400 ml-1 cursor-default"
+              >
+                .
+              </Link>
+            </div>
             <NavItem />
           </div>
           <div className="max-md:hidden">

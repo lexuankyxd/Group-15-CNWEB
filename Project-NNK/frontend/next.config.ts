@@ -5,32 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "cdn.tgdd.vn",
-      },
-      {
-        protocol: "https",
-        hostname: "media.wired.com",
-      },
-      {
-        protocol: "https",
-        hostname: "i5.walmartimages.com",
-      },
-      {
-        protocol: "https",
-        hostname: "www.xpres.co.uk",
-      },
-      {
-        protocol: "https",
-        hostname: "m.media-amazon.com",
-      },
-      {
-        protocol: "https",
-        hostname: "cdn.viettelstore.vn",
-      },
-      {
-        protocol: "https",
-        hostname: "product.hstatic.net",
-      },
+        hostname: "**",
+      }
     ],
   },
 };

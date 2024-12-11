@@ -12,11 +12,16 @@ const BASE_URL = "http://localhost:5000/api";
 export const publicApi = {
   getAllProducts: async (params?: { page?: number; limit?: number }) => {
     try {
-      const queryParams = new URLSearchParams({
-        page: String(params?.page || 1),
-        limit: String(params?.limit || 10)
-      });
-      const res = await axios.get(`${BASE_URL}/products?${queryParams}`);
+      let url = `${BASE_URL}/products`;
+      
+      if (params?.page || params?.limit) {
+        const queryParams = new URLSearchParams();
+        if (params.page) queryParams.append('page', String(params.page));
+        if (params.limit) queryParams.append('limit', String(params.limit));
+        url += `?${queryParams}`;
+      }
+  
+      const res = await axios.get(url);
       return {
         products: res.data.products,
         total: res.data.total,
@@ -150,7 +155,7 @@ export const createProtectedApi = (token: string) => {
       if (error.response?.status === 401) {
         // Clear local storage and trigger logout
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        window.location.href = '/customer-sign-in';
       }
       return Promise.reject(error);
     }
@@ -242,8 +247,12 @@ export const createProtectedApi = (token: string) => {
     // Admin specific operations
     admin: {
       getAllOrders: async () => {
-        const res = await api.get('/orders');
-        return res.data;
+        try {
+          const res = await api.get('/orders/');
+          return res.data;
+        } catch (error) {
+          throw handleApiError(error);
+        }
       },
 
       updateOrderStatus: async (orderId: string, status: string) => {
@@ -283,6 +292,29 @@ export const createProtectedApi = (token: string) => {
 
       getAdminById: async (id: string) => {
         const res = await api.get(`/admins/${id}`);
+        return res.data;
+      },
+
+      getAllCustomers: async (page?: number, limit?: number) => {
+        let url = '/customers';
+        const params = new URLSearchParams();
+        
+        if (page !== undefined) {
+          params.append('page', page.toString());
+        }
+        if (limit !== undefined) {
+          params.append('limit', limit.toString());
+        }
+      
+        const queryString = params.toString();
+        url = queryString ? `${url}?${queryString}` : url;
+        
+        const res = await api.get(url);
+        return res.data;
+      },
+
+      deleteCustomer: async (id: string) => {
+        const res = await api.delete(`/customers/${id}`);
         return res.data;
       }
     }
