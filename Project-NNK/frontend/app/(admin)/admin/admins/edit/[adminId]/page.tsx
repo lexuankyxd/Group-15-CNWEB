@@ -1,6 +1,6 @@
 import TitleHeader from "@/app/(admin)/components/title-header";
 import React from "react";
-import NewAdmin from "../components/new-admin";
+import NewAdmin from "../../components/new-admin";
 
 const EditPageAdmin = () => {
   return (
