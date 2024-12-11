@@ -12,11 +12,16 @@ const BASE_URL = "http://localhost:5000/api";
 export const publicApi = {
   getAllProducts: async (params?: { page?: number; limit?: number }) => {
     try {
-      const queryParams = new URLSearchParams({
-        page: String(params?.page),
-        limit: String(params?.limit)
-      });
-      const res = await axios.get(`${BASE_URL}/products?${queryParams}`);
+      let url = `${BASE_URL}/products`;
+      
+      if (params?.page || params?.limit) {
+        const queryParams = new URLSearchParams();
+        if (params.page) queryParams.append('page', String(params.page));
+        if (params.limit) queryParams.append('limit', String(params.limit));
+        url += `?${queryParams}`;
+      }
+  
+      const res = await axios.get(url);
       return {
         products: res.data.products,
         total: res.data.total,
