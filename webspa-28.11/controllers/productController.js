@@ -71,24 +71,33 @@ exports.deleteProduct = async (req, res) => {
 
 // Lấy tất cả sản phẩm với phân trang
 exports.getAllProducts = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; 
-  const limit = parseInt(req.query.limit) || 10; 
-  const skip = (page - 1) * limit;
-
   try {
-    const totalProducts = await Product.countDocuments();
-    const totalPages = Math.ceil(totalProducts / limit);
+    // Check if pagination parameters exist
+    if (req.query.page || req.query.limit) {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
 
-    // Lấy các sản phẩm trong trang hiện tại
-    const products = await Product.find().skip(skip).limit(limit);
+      const totalProducts = await Product.countDocuments();
+      const totalPages = Math.ceil(totalProducts / limit);
+      const products = await Product.find().skip(skip).limit(limit);
 
-    res.status(200).json({
+      return res.status(200).json({
+        message: "Danh sách sản phẩm",
+        products,
+        currentPage: page,
+        totalPages,
+        totalProducts,
+      });
+    }
+
+    // Return all products if no pagination parameters
+    const products = await Product.find();
+    return res.status(200).json({
       message: "Danh sách sản phẩm",
       products,
-      currentPage: page,
-      totalPages,
-      totalProducts,
     });
+
   } catch (error) {
     console.error("Lỗi khi lấy sản phẩm:", error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
