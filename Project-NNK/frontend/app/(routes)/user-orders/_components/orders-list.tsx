@@ -11,20 +11,30 @@ import OrdersSkeleton from "./orders-skeleton";
 export default function OrdersList() {
   const { user } = useAuth();
   
-  const { data: orders, isLoading } = useQuery<Order[]>({
+  const { data: response, isLoading, error } = useQuery<{ orders: Order[], success: boolean }>({
     queryKey: ["user-orders"],
     queryFn: async () => {
       if (!user?.token) throw new Error("No auth token");
       const api = createProtectedApi(user.token);
-      const response = await api.orders.getUserOrders();
-      return response.orders;
+      return api.orders.getUserOrders();
     },
     enabled: !!user?.token
   });
 
   if (isLoading) return <OrdersSkeleton />;
 
-  if (!orders?.length) {
+  if (error) {
+    return (
+      <Container>
+        <div className="py-20 text-center">
+          <h2 className="text-2xl font-bold text-red-600">Error loading orders</h2>
+          <p className="text-gray-500 mt-2">Please try again later</p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (!response?.orders?.length) {
     return (
       <Container>
         <div className="py-20 text-center">
@@ -40,7 +50,7 @@ export default function OrdersList() {
       <div className="py-8">
         <h1 className="text-3xl font-bold mb-8">My Orders</h1>
         <div className="space-y-4">
-          {orders.map((order) => (
+          {response.orders.map((order) => (
             <OrderCard key={order._id} order={order} />
           ))}
         </div>
