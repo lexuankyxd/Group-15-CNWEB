@@ -13,8 +13,8 @@ export const publicApi = {
   getAllProducts: async (params?: { page?: number; limit?: number }) => {
     try {
       const queryParams = new URLSearchParams({
-        page: String(params?.page || 1),
-        limit: String(params?.limit || 10)
+        page: String(params?.page),
+        limit: String(params?.limit)
       });
       const res = await axios.get(`${BASE_URL}/products?${queryParams}`);
       return {
@@ -290,8 +290,21 @@ export const createProtectedApi = (token: string) => {
         return res.data;
       },
 
-      getAllCustomers: async (page = 1, limit = 10) => {
-        const res = await api.get(`/customers?page=${page}&limit=${limit}`);
+      getAllCustomers: async (page?: number, limit?: number) => {
+        let url = '/customers';
+        const params = new URLSearchParams();
+        
+        if (page !== undefined) {
+          params.append('page', page.toString());
+        }
+        if (limit !== undefined) {
+          params.append('limit', limit.toString());
+        }
+      
+        const queryString = params.toString();
+        url = queryString ? `${url}?${queryString}` : url;
+        
+        const res = await api.get(url);
         return res.data;
       },
 
