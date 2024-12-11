@@ -1,7 +1,14 @@
 import { Order } from "@/types";
 import formatDate from "@/app/utils/formateDate";
+import formatVND from "@/app/utils/formatCurrency";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/app/utils/authContext";
+import { createProtectedApi } from "@/lib/apiCalls";
+import { toast } from "react-hot-toast";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 
 interface OrderCardProps {
   order: Order;
@@ -16,6 +23,31 @@ const statusColors = {
 } as const;
 
 export default function OrderCard({ order }: OrderCardProps) {
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+
+  const handleCancel = async () => {
+    if (!user?.token) return;
+    setIsLoading(true);
+
+    try {
+      const api = createProtectedApi(user.token);
+      await api.orders.cancel(order._id);
+      
+      toast.success('Order cancelled successfully');
+      // Refresh orders list
+      queryClient.invalidateQueries(['user-orders']);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to cancel order');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Show cancel button only for orders that can be cancelled
+  const canCancel = !["Đang giao", "Hoàn thành", "Đã hủy"].includes(order.status);
+
   return (
     <Card className="p-6">
       <div className="flex justify-between items-start mb-4">
@@ -32,12 +64,17 @@ export default function OrderCard({ order }: OrderCardProps) {
 
       <div className="space-y-4">
         {order.items.map((item) => (
-          <div key={item.productId} className="flex justify-between border-b pb-2">
-            <div>
-              <p className="font-medium">Product ID: {item.productId}</p>
+          <div key={item.productId._id} className="flex items-center gap-4 pb-2">
+            <img 
+              src={item.productId.image} 
+              alt={item.productId.name}
+              className="w-20 h-20 object-cover rounded"
+            />
+            <div className="flex-1">
+              <p className="font-medium">{item.productId.name}</p>
               <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+              <p className="font-medium">{formatVND(item.price)}</p>
             </div>
-            <p className="font-medium">${item.price.toFixed(2)}</p>
           </div>
         ))}
       </div>
@@ -49,9 +86,21 @@ export default function OrderCard({ order }: OrderCardProps) {
             <p className="text-sm text-gray-500">Shipping Address: {order.shippingAddress}</p>
           </div>
           <div className="text-xl font-bold">
-            Total: ${order.totalPrice.toFixed(2)}
+            Total: {formatVND(order.totalPrice)}
           </div>
         </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        {canCancel && (
+          <Button 
+            onClick={handleCancel}
+            disabled={isLoading}
+            variant="destructive"
+          >
+            Cancel Order
+          </Button>
+        )}
       </div>
     </Card>
   );
