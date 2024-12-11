@@ -11,7 +11,12 @@ export interface Product {
 }
 
 export interface OrderItem {
-  productId: string;
+  productId: {
+    _id: string;
+    name: string;
+    image: string;
+    price: number;
+  };
   quantity: number;
   price: number;
 }
@@ -118,4 +123,10 @@ export interface PaginatedCustomerResponse {
   currentPage: number;
   totalPages: number;
   totalCustomers: number;
+}
+
+export interface PaymentSchema {
+  paymentMethod: 'Tiền mặt' | 'Chuyển khoản';
+  shippingAddress: string;
+  paymentAccount?: string;
 }
