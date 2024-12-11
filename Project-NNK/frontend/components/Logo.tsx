@@ -14,11 +14,6 @@ const Logo = () => {
           className="object-contain"
         />
       </Link>
-      <div className="ml-4 text-sm">
-        <Link href="/admin-sign-in" className="text-gray-500 hover:text-black mr-2">
-          Admin
-        </Link>
-      </div>
     </div>
   );
 };
