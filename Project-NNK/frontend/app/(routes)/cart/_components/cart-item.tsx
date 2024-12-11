@@ -6,6 +6,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { useAuth } from "@/app/utils/authContext";
+import formatVND from "@/app/utils/formatCurrency";
 import { createProtectedApi, publicApi } from "@/lib/apiCalls";
 import { AxiosError } from "axios";
 import toast from "react-hot-toast";
@@ -79,7 +80,7 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
           </div>
           <div className="flex flex-col mt-2 gap-y-3 max-md:flex-row max-md:justify-between max-md:items-center">
             <p className="text-lg text-gray-900 font-semibold">
-              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(itemTotal)}
+              {formatVND(itemTotal)}
             </p>
             <div className="flex max-md:justify-end w-full">
               <div className="border w-28 rounded-3xl p-2 gap-2 flex justify-between">

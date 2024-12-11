@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import useCart from "@/hooks/use-cart";
 import { useAuth } from "@/app/utils/authContext";
 import { toast } from "react-hot-toast";
+import formatVND from "@/app/utils/formatCurrency";
 
 interface InfoProps {
   data: Product;
@@ -32,7 +33,7 @@ const Info: React.FC<InfoProps> = ({ data }) => {
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-bold text-gray-900">{data.name}</h1>
       <p className="text-2xl text-gray-900">
-        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.price)}
+        {formatVND(data.price)}
       </p>
       <p className="text-gray-600 text-lg">{data.description}</p>
       

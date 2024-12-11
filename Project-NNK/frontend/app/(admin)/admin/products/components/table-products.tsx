@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useState } from "react";
 import ReactPaginate from "react-paginate";
 import formatDate, { sortByDate } from "@/app/utils/formateDate";
+import formatVND from "@/app/utils/formatCurrency";
 import TitleHeader from "@/app/(admin)/components/title-header";
 import { useAuth } from "@/app/utils/authContext";
 import { createProtectedApi, publicApi } from "@/lib/apiCalls";
@@ -133,7 +134,7 @@ export default function ProductTable() {
                 </TableCell>
                 <TableCell align="left">{product.name}</TableCell>
                 <TableCell align="center">{product.category}</TableCell>
-                <TableCell align="center">${product.price}</TableCell>
+                <TableCell align="center">{formatVND(product.price)}</TableCell>
                 <TableCell align="center">
                   {product.description.slice(0, 11)}
                   {product.description.length > 12 && "..."}

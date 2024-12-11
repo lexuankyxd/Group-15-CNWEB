@@ -1,6 +1,7 @@
 "use client";
 
 import useCart from "@/hooks/use-cart";
+import formatVND from "@/app/utils/formatCurrency";
 
 const Summary = () => {
   const totalCartPrice = useCart((state) => state.totalCartPrice);
@@ -12,7 +13,7 @@ const Summary = () => {
         <div className="flex items-center justify-between border-t border-gray-200 pt-4">
           <div className="text-base font-medium text-gray-900">Order total</div>
           <p className="text-lg text-gray-900 font-semibold">
-            ${Number(totalCartPrice).toFixed(2)}
+          {formatVND(totalCartPrice)}
           </p>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Product } from "@/types";
+import formatVND from "@/app/utils/formatCurrency";
 
 interface ProductCardProps {
   data: Product;
@@ -13,13 +14,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
 
   const handleClick = () => {
     router.push(`/product/${data._id}`);
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(price);
   };
 
   return (
@@ -55,7 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
 
       {/* Price Section */}
       <div className="flex items-center justify-between">
-        <div className="font-semibold">{formatPrice(data.price)}</div>
+        <div className="font-semibold">{formatVND(data.price)}</div>
         <div className="text-sm text-gray-500">
           {data.stock > 0 ? `Còn ${data.stock}` : 'Hết hàng'}
         </div>
