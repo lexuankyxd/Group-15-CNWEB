@@ -6,7 +6,9 @@ import {
   RegisterData
 } from "@/types";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://group-15-cnweb.onrender.com/api";
+//const BASE_URL = "http://localhost:5000/api";
+
 
 // Public API calls
 export const publicApi = {
@@ -293,6 +295,11 @@ export const createProtectedApi = (token: string) => {
         return res.data;
       },
 
+      deleteAdmin: async (id: string) => {
+        const res = await api.delete(`/admins/${id}`);
+        return res.data;
+      },
+
       getAllCustomers: async (page?: number, limit?: number) => {
         let url = '/customers';
         const params = new URLSearchParams();
@@ -311,8 +318,23 @@ export const createProtectedApi = (token: string) => {
         return res.data;
       },
 
+      getCustomerById: async (id: string) => {
+        const res = await api.get(`/customers/${id}`);
+        return res.data;
+      },
+
       deleteCustomer: async (id: string) => {
         const res = await api.delete(`/customers/${id}`);
+        return res.data;
+      },
+
+      updateCustomer: async (id: string, customerData: any) => {
+        const res = await api.put(`/customers/${id}`, customerData);
+        return res.data;
+      },
+
+      createCustomer: async (customerData: any) => {
+        const res = await api.post('/customers/register', customerData);
         return res.data;
       }
     }

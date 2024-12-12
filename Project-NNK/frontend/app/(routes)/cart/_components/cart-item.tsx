@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import useCart from "@/hooks/use-cart";
-import { CartItem, Product } from "@/types";
+import { type CartItem, Product } from "@/types";
 import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";

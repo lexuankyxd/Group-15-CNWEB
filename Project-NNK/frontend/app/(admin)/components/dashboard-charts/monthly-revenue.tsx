@@ -6,7 +6,7 @@ interface MonthlyRevenueProps {
   data: Array<{ month: string; value: number; }>;
 }
 
-const MonthlyRevenue = ({ data }: MonthlyRevenueProps) => {
+const MonthlyRevenue = ({ data = [] }: MonthlyRevenueProps) => {
   return (
     <Card>
       <CardHeader>

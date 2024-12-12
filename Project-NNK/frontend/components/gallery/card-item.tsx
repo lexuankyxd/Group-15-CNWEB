@@ -1,15 +1,15 @@
 "use client";
-import { Card, CardContent } from "../ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
 
-type CardProps = {
-  image: string;
+interface CardItemProps {
   category: string;
-};
+  image: string;
+}
 
-const CardItem = ({ image, category }: CardProps) => {
+const CardItem = ({ category, image }: CardItemProps) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -21,33 +21,22 @@ const CardItem = ({ image, category }: CardProps) => {
   }
 
   return (
-    <Card>
-      <CardContent className="flex aspect-square justify-center relative">
-        {image ? (
-          <>
-            <Image
-              src={image}
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "5px",
-              }}
-              fill
-              alt={`Image of ${category}`}
-              sizes="any"
-            />
-            <div className="absolute left-8 bottom-8 flex gap-2 flex-col w-24">
-              <p className="text-black font-bold text-2xl">
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </p>
-              <Button>Shop</Button>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-center w-full h-full">
-            <p className="text-gray-500">No Image Available</p>
-          </div>
-        )}
+    <Card className="relative flex flex-col">
+      <CardContent className="p-0">
+        <div className="aspect-square relative">
+          <Image
+            src={image}
+            alt={category}
+            fill
+            className="object-cover rounded-t-lg"
+          />
+        </div>
+        <div className="p-4 text-center bg-white rounded-b-lg">
+          <h3 className="font-semibold text-lg mb-2">{category}</h3>
+          <Button className="w-full">
+            Shop Now
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

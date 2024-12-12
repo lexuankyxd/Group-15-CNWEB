@@ -55,7 +55,7 @@ const ShopPage = async ({
   
   // Apply search filter if query exists
   if (searchParams.q) {
-    filtered = filtered.filter(product => 
+    filtered = filtered.filter((product: Product) => 
       product.name.toLowerCase().includes(String(searchParams.q).toLowerCase())
     );
   }

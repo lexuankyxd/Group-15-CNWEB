@@ -1,9 +1,8 @@
-
 import Link from "next/link";
 
 const Banner = () => {
   return (
-    <div className="relative h-[500px] w-full mb-8">
+    <div className="relative h-[300px] md:h-[400px] lg:h-[500px] w-full mb-8">
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
@@ -11,15 +10,15 @@ const Banner = () => {
         }}
       >
         <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 flex flex-col justify-center items-start p-12 text-white">
-          <h1 className="text-4xl font-bold mb-4">Welcome to 4Kay Store</h1>
-          <p className="text-lg mb-6">
+        <div className="absolute inset-0 md:right-0 md:left-auto md:w-1/2 flex flex-col justify-center items-start p-6 md:p-8 lg:p-12 text-white">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4">Welcome to 4Kay Store</h1>
+          <p className="text-sm md:text-base lg:text-lg mb-4 md:mb-6">
             Discover our amazing collection of products with the best quality and prices.
             Shop with confidence and enjoy our excellent customer service.
           </p>
           <Link 
             href="/shop"
-            className="bg-white text-black px-8 py-3 rounded-md hover:bg-gray-200 transition-colors"
+            className="bg-white text-black px-6 md:px-8 py-2 md:py-3 text-sm md:text-base rounded-md hover:bg-gray-200 transition-colors"
           >
             Shop Now
           </Link>

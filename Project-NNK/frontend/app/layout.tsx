@@ -13,10 +13,19 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   icons: [
     {
-      url: "/logo.png",
-      href: "/logo.png",
+      url: "/logo.jpeg",
+      href: "/logo.jpeg",
     },
   ],
+  openGraph: {
+    images: [
+      {
+        url: "/logo.jpeg",
+        alt: "Logo",
+      },
+    ],
+  },
+  metadataBase: new URL("https://4kay.vercel.app"),
 };
 
 export default function RootLayout({

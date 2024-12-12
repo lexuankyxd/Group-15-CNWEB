@@ -41,7 +41,8 @@ const UserTable = () => {
       const api = createProtectedApi(user.token);
       return api.admin.getAllCustomers(currentPage, USERS_PER_PAGE);
     },
-    keepPreviousData: true
+    staleTime: 5000,
+    refetchOnWindowFocus: false
   });
 
   const deleteUser = async (id: string) => {

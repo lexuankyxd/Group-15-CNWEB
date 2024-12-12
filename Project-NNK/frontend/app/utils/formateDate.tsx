@@ -1,6 +1,13 @@
 const moment = require("moment/moment");
 
-const formatDate = (date: string) => {
+const formatDate = (date: Date | string): string => {
+  if (date instanceof Date) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[date.getMonth()];
+  }
   return moment(date).format("DD/MM/YYYY");
 };
 

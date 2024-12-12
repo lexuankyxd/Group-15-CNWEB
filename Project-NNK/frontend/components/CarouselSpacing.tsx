@@ -60,17 +60,15 @@ export function CarouselSpacing() {
       plugins={[Autoplay({ delay: 2500 })]}
       className="w-full relative"
     >
-      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 pointer-events-none">
-        <CarouselPrevious className="pointer-events-auto" />
-        <CarouselNext className="pointer-events-auto" />
-      </div>
+      <CarouselPrevious className="absolute z-50 left-7 w-min h-min text-xl p-4 top-[45%]" />
+      <CarouselNext className="absolute z-50 w-min h-min right-4 text-xl top-[45%] p-4" />
       <CarouselContent>
         {categoryInfo.map((category) => (
           <CarouselItem
             key={category.name}
-            className="pl-1 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/5"
+            className="pl-1 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
           >
-            <Link href={`/shop?category=${encodeURIComponent(category.name)}`}>
+            <Link href={`/shop/${encodeURIComponent(category.name)}`}>
               <CardItem
                 category={category.name}
                 image={category.image}

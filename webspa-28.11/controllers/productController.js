@@ -155,8 +155,8 @@ exports.findProducts = async (req, res) => {
 
 // Tìm sản phẩm theo category và mức giá
 exports.findProductsByCategory = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; 
-  const limit = parseInt(req.query.limit) || 10; 
+  const page = parseInt(req.query.page); 
+  const limit = parseInt(req.query.limit); 
   const skip = (page - 1) * limit;
 
   const category = req.query.category; 

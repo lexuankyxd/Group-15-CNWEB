@@ -97,7 +97,7 @@ const AdminTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data?.admins.map((admin) => (
+            {data?.admins.map((admin: Admin) => (
               <TableRow
                 key={admin._id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}

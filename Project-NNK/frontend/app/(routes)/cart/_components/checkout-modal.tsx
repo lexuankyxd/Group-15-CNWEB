@@ -42,9 +42,6 @@ const CheckoutModal = ({ isOpen, onClose, totalPrice }: CheckoutModalProps) => {
           paymentAccount: formData.paymentAccount
         } : {})
       });
-
-      // Only need to clear frontend cart since backend handles cart removal
-      cart.removeAllCart();
       
       toast.success('Order placed successfully!');
       onClose();

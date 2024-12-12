@@ -13,18 +13,22 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Link from "next/link";
 
 const ProductItem = () => {
-  const { productId } = useParams();
+  const params = useParams();
+  const productId = params.productId as string;
 
   const [productQuery, relatedQuery] = useQueries({
     queries: [
       {
         queryKey: ["single product", productId],
-        queryFn: () => publicApi.getProduct(productId),
+        queryFn: () => productId ? publicApi.getProduct(productId).then(res => res.product) : null,
+        enabled: !!productId,
       },
       {
         queryKey: ["related products", productId],
         queryFn: async () => {
-          const product = await publicApi.getProduct(productId);
+          if (!productId) return null;
+          const response = await publicApi.getProduct(productId);
+          const product = response.product;
           return publicApi.getCategoryProducts(product.category).then(res => res.products);
         },
         enabled: !!productId,
@@ -32,7 +36,7 @@ const ProductItem = () => {
     ],
   }) as [UseQueryResult<Product>, UseQueryResult<Product[]>];
 
-  if (productQuery.isLoading) {
+  if (!productId || productQuery.isLoading) {
     return <LoadingSkeleton />;
   }
 
@@ -60,9 +64,9 @@ const ProductItem = () => {
           </Link>
           
           <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12">
-            <Gallery image={productQuery.data.product.image} />
+            <Gallery image={productQuery.data.image} />
             <div className="mt-10 sm:mt-16 lg:mt-0">
-              <Info data={productQuery.data.product} />
+              <Info data={productQuery.data} />
             </div>
           </div>
 

@@ -39,20 +39,20 @@ const AdminPage = () => {
           const currentYear = now.getFullYear();
           
           const currentMonthRevenue = paidOrders
-            .filter(order => {
+            .filter((order: Order) => {
               const orderDate = new Date(order.createdAt);
               return orderDate.getMonth() === currentMonth && 
                      orderDate.getFullYear() === currentYear;
             })
-            .reduce((sum, order) => sum + order.totalPrice, 0);
+            .reduce((sum: number, order: Order) => sum + order.totalPrice, 0);
 
           const previousMonthRevenue = paidOrders
-            .filter(order => {
+            .filter((order: Order) => {
               const orderDate = new Date(order.createdAt);
               return orderDate.getMonth() === (currentMonth - 1) && 
                      orderDate.getFullYear() === currentYear;
             })
-            .reduce((sum, order) => sum + order.totalPrice, 0);
+            .reduce((sum: number, order: Order) => sum + order.totalPrice, 0);
 
           const revenueGrowth = previousMonthRevenue === 0 
             ? 100 
@@ -75,8 +75,8 @@ const AdminPage = () => {
           const salesData = last7Days.map(date => ({
             date: date,
             amount: paidOrders
-              .filter(order => new Date(order.createdAt).toISOString().split('T')[0] === date)
-              .reduce((sum, order) => sum + order.totalPrice, 0)
+              .filter((order: Order) => new Date(order.createdAt).toISOString().split('T')[0] === date)
+              .reduce((sum: number, order: Order) => sum + order.totalPrice, 0)
           }));
 
           // Remove averageDailyOrders calculation
@@ -116,16 +116,14 @@ const AdminPage = () => {
         queryFn: async () => {
           if (!protectedApi) throw new Error("Not authenticated");
           
-          // Fetch both orders and products in parallel
           const [ordersResponse, productsResponse] = await Promise.all([
             protectedApi.admin.getAllOrders(),
-            publicApi.getAllProducts({ limit: 1000 }) // Get all products
+            publicApi.getAllProducts({ limit: 1000 })
           ]);
           
           const orders = ordersResponse.orders;
           const products = productsResponse.products;
 
-          // Create products lookup map
           const productsMap = products.reduce((acc: any, product: any) => {
             acc[product._id] = {
               name: product.name,
@@ -134,69 +132,97 @@ const AdminPage = () => {
             return acc;
           }, {});
 
-          // Process monthly revenue
-          const monthlyRevenue = orders.reduce((acc: any, order: Order) => {
+          // Only consider completed orders for statistics
+          const completedOrders = orders.filter((order: Order) => 
+            order.status === 'Hoàn thành'
+          );
+
+          // Add some console logs to debug order filtering
+          console.log('All orders:', orders);
+          console.log('Completed orders:', completedOrders);
+
+          const monthlyRevenue = completedOrders.reduce((acc: any, order: Order) => {
             const month = new Date(order.createdAt).getMonth();
             if (!acc[month]) acc[month] = 0;
-            if (order.status === 'Hoàn thành') {
-              acc[month] += order.totalPrice;
-            }
+            acc[month] += order.totalPrice;
             return acc;
           }, {});
 
-          // Process product categories with actual categories from products
-          const categoryData = orders.reduce((acc: any, order: Order) => {
+          const categoryData = completedOrders.reduce((acc: any, order: Order) => {
             order.items.forEach(item => {
-              const product = productsMap[item.productId];
-              if (product) {
-                if (!acc[product.category]) acc[product.category] = 0;
-                acc[product.category] += item.quantity;
+              // Handle both cases where productId might be an object or string
+              const productId = typeof item.productId === 'object' ? 
+                item.productId._id : 
+                item.productId;
+              
+              const product = productsMap[productId];
+              
+              // Add console.log for debugging
+              console.log('Product:', product);
+              console.log('ProductId:', productId);
+              
+              if (product && product.category) {
+                const category = product.category;
+                if (!acc[category]) {
+                  acc[category] = 0;
+                }
+                acc[category] += item.quantity;
               }
             });
             return acc;
           }, {});
 
-          // Process order status
+          // Add console.log to check final categoryData
+          console.log('Category Data:', categoryData);
+
+          const productSales = completedOrders.reduce((acc: any, order: Order) => {
+            order.items.forEach(item => {
+              // Get the correct product ID whether it's a string or object
+              const productId = typeof item.productId === 'object' ? 
+                item.productId._id : 
+                item.productId;
+              
+              const product = productsMap[productId];
+          
+              if (product) {
+                const key = product.name;
+                if (!acc[key]) {
+                  acc[key] = {
+                    name: product.name,
+                    quantity: 0,
+                    revenue: 0
+                  };
+                }
+                acc[key].quantity += item.quantity;
+                acc[key].revenue += item.quantity * item.price;
+              }
+            });
+            return acc;
+          }, {});
+
           const statusData = orders.reduce((acc: any, order: Order) => {
             if (!acc[order.status]) acc[order.status] = 0;
             acc[order.status]++;
             return acc;
           }, {});
 
-          // Get top selling products with names
-          const productSales = orders.reduce((acc: any, order: Order) => {
-            order.items.forEach(item => {
-              const product = productsMap[item.productId];
-              if (product) {
-                if (!acc[item.productId]) {
-                  acc[item.productId] = {
-                    name: product.name,
-                    quantity: 0
-                  };
-                }
-                acc[item.productId].quantity += item.quantity;
-              }
-            });
-            return acc;
-          }, {});
-
           return {
             monthlyRevenue: Object.entries(monthlyRevenue).map(([month, value]) => ({
               month: formatDate(new Date(2024, parseInt(month))),
-              value
+              value: value as number
             })),
             categoryData: Object.entries(categoryData).map(([name, value]) => ({
               name,
-              value
+              value: value as number
             })),
             statusData: Object.entries(statusData).map(([name, value]) => ({
               name,
-              value
+              value: value as number
             })),
-            topProducts: Object.entries(productSales)
-              .sort(([,a]: any, [,b]: any) => b.quantity - a.quantity)
-              .slice(0, 5)
-              .map(([id, data]: [string, any]) => ({
+            topProducts: Object.values(productSales)
+              .sort((a: any, b: any) => b.quantity - a.quantity)
+              .slice(0, 3) // Change to top 3 products
+              .map((data: any) => ({
                 name: data.name,
                 quantity: data.quantity
               }))

@@ -1,4 +1,4 @@
-import { Order } from "@/types";
+import { Order, OrderItem } from "@/types";
 import formatDate from "@/app/utils/formateDate";
 import formatVND from "@/app/utils/formatCurrency";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ export default function OrderCard({ order }: OrderCardProps) {
       
       toast.success('Order cancelled successfully');
       // Refresh orders list
-      queryClient.invalidateQueries(['user-orders']);
+      queryClient.invalidateQueries({ queryKey: ['user-orders'] });
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Failed to cancel order');
     } finally {
@@ -63,7 +63,7 @@ export default function OrderCard({ order }: OrderCardProps) {
       </div>
 
       <div className="space-y-4">
-        {order.items.map((item) => (
+        {order.items.map((item: OrderItem) => (
           <div key={item.productId._id} className="flex items-center gap-4 pb-2">
             <img 
               src={item.productId.image} 
