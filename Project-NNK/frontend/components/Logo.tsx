@@ -7,7 +7,7 @@ const Logo = () => {
     <div className="flex items-center gap-2">
       <Link href="/" className="ml-4 flex lg:ml-0 gap-x-2">
         <Image
-          src="/logo.png"
+          src="/logo.jpeg"
           alt="Store Logo"
           width={50}
           height={50}

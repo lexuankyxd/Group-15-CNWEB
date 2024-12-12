@@ -16,31 +16,52 @@ const CategoryPage = () => {
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [category, setCategory] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const ITEMS_PER_PAGE = 12;
 
   useEffect(() => {
     const fetchProducts = async () => {
       const categoryPath = decodeURIComponent(pathname.split("/").pop() || "");
       setCategory(categoryPath);
 
-      const pageParam = searchParams.get("page");
+      const page = Number(searchParams.get("page")) || 1;
       const priceRangeParam = searchParams.get("priceRange");
       const sortParam = searchParams.get("sort");
-
-      const sortValue = Array.isArray(sortParam) ? sortParam[0] : sortParam;
-      const priceRangeValue = Array.isArray(priceRangeParam) ? priceRangeParam[0] : priceRangeParam;
-      const pageValue = Array.isArray(pageParam) ? pageParam[0] : pageParam;
+      const searchQuery = searchParams.get("q");
 
       try {
-        const { products, total, currentPage } = await publicApi.getCategoryProducts(
+        // Call API with price range parameter
+        const { products } = await publicApi.getCategoryProducts(
           categoryPath,
-          { 
-            priceRange: priceRangeValue as string 
+          {
+            priceRange: priceRangeParam || undefined
           }
         );
 
-        setProducts(sortValue ? filteredData({ sort: sortValue }, products) : products);
-        setTotal(total);
-        setCurrentPage(currentPage);
+        // Store all products
+        setProducts(products);
+        setTotal(products.length);
+
+        let filtered = [...products];
+
+        // Apply search filter if exists
+        if (searchQuery) {
+          filtered = filtered.filter(product => 
+            product.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+
+        // Apply sort if specified
+        if (sortParam) {
+          filtered = filteredData({ sort: sortParam }, filtered);
+        }
+
+        // Apply pagination
+        const startIndex = (page - 1) * ITEMS_PER_PAGE;
+        const paginatedProducts = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+        setCurrentPage(page);
+        setFilteredProducts(paginatedProducts);
       } catch (error) {
         console.error("Error loading products:", error);
       }
@@ -49,7 +70,7 @@ const CategoryPage = () => {
     fetchProducts();
   }, [pathname, searchParams]);
 
-  if (!products.length) {
+  if (!filteredProducts.length) {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-2xl font-semibold mb-4">No products found</h1>
@@ -60,18 +81,18 @@ const CategoryPage = () => {
   return (
     <div className="container mx-auto px-4">
       <h1 className="text-2xl font-semibold mb-4">
-        {category.charAt(0).toUpperCase() + category.slice(1)} Products
+        {decodeURIComponent(category)} Products
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {products.map((product: Product) => (
+        {filteredProducts.map((product: Product) => (
           <ProductCard key={product._id} data={product} />
         ))}
       </div>
 
-      {total > 5 && (
+      {total > ITEMS_PER_PAGE && (
         <div className="mt-8 flex justify-center gap-2">
-          {Array.from({ length: Math.ceil(total / 5) }).map((_, i) => {
+          {Array.from({ length: Math.ceil(total / ITEMS_PER_PAGE) }).map((_, i) => {
             const newParams = new URLSearchParams(searchParams.toString());
             newParams.set('page', String(i + 1));
             return (

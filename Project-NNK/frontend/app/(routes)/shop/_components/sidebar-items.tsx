@@ -1,74 +1,43 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { ChangeEvent } from "react";
+import { usePathname } from "next/navigation";
 
 interface SidebarItemsProps {
   categories: string[];
 }
 
-const SidebarItems = ({ categories = [] }: SidebarItemsProps) => {
-  const pathName = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const selectedCategory = event.target.value;
-    const currentParams = new URLSearchParams(searchParams.toString());
-    currentParams.delete('page'); // Reset page when changing category
-    
-    const queryString = currentParams.toString();
-    const path = selectedCategory === "all" ? "/shop" : `/shop/${selectedCategory}`;
-    router.push(queryString ? `${path}?${queryString}` : path);
-  };
-
-  const handleCategoryClick = (category: string | "all") => {
-    const currentParams = new URLSearchParams(searchParams.toString());
-    currentParams.delete('page'); // Reset page when changing category
-    
-    const queryString = currentParams.toString();
-    const path = category === "all" ? "/shop" : `/shop/${category}`;
-    router.push(queryString ? `${path}?${queryString}` : path);
-  };
-
-  const currentCategory = pathName === "/shop" ? "all" : pathName.split("/").pop();
+const SidebarItems = ({ categories }: SidebarItemsProps) => {
+  const pathname = usePathname();
+  const currentCategory = pathname.split("/").pop();
+  const isShopPage = pathname === "/shop";
 
   return (
-    <>
-      <select
-        onChange={handleSelectChange}
-        className="w-full p-2 border border-neutral-800 mt-2 text-sm font-serif sm:hidden"
-        value={currentCategory ?? "all"}
+    <div className="flex flex-col gap-2 mt-2">
+      <Link 
+        href="/shop"
+        className={cn(
+          "px-3 py-2 text-sm text-left border rounded-md transition-colors hover:bg-gray-100",
+          isShopPage ? "bg-black text-white hover:bg-black" : ""
+        )}
       >
-        <option value="all">All Products</option>
-        {categories.map((category: string) => (
-          <option key={category} value={category}>
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </option>
-        ))}
-      </select>
-
-      <div className="hidden sm:block space-y-2">
-        <div
-          onClick={() => handleCategoryClick("all")}
-          className={`cursor-pointer hover:underline underline-offset-4 tracking-widest font-serif 
-            ${pathName === "/shop" ? "underline" : ""}`}
+        All Products
+      </Link>
+      
+      {categories.map((category) => (
+        <Link 
+          key={category}
+          href={`/shop/${category}`}
+          className={cn(
+            "px-3 py-2 text-sm text-left border rounded-md transition-colors hover:bg-gray-100",
+            decodeURIComponent(currentCategory || '') === category ? "bg-black text-white hover:bg-black" : ""
+          )}
         >
-          All Products
-        </div>
-        {categories.map((category) => (
-          <div
-            key={category}
-            onClick={() => handleCategoryClick(category)}
-            className={`cursor-pointer hover:underline underline-offset-4 tracking-widest font-serif
-              ${pathName === `/shop/${category}` ? "underline" : ""}`}
-          >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </div>
-        ))}
-      </div>
-    </>
+          {category}
+        </Link>
+      ))}
+    </div>
   );
 };
 

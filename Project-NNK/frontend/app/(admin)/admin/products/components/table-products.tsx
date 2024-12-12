@@ -36,7 +36,7 @@ type createData = {
 
 export default function ProductTable() {
   const [currentPage, setCurrentPage] = useState(0);
-  const productsPerPage = 5;
+  const productsPerPage = 10;
   const { user } = useAuth();
   const queryClient = useQueryClient();
   

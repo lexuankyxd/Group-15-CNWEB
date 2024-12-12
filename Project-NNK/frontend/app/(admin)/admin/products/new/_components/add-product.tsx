@@ -13,9 +13,10 @@ import toast from "react-hot-toast";
 type initialState = {
   name: string;
   description: string;
-  price: number;
+  price: string;
   image: string;
   category: string;
+  stock: string;
 };
 
 const AddProduct = () => {
@@ -26,9 +27,10 @@ const AddProduct = () => {
   const [dataForm, setDataForm] = useState<initialState>({
     name: "",
     description: "",
-    price: 0,
+    price: "",
     image: "",
     category: "",
+    stock: "",
   });
   const [errors, setErrors] = useState({
     name: "",
@@ -36,6 +38,7 @@ const AddProduct = () => {
     price: "",
     image: "",
     category: "",
+    stock: "",
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,6 +57,7 @@ const AddProduct = () => {
       price: "",
       image: "",
       category: "",
+      stock: "",
     });
 
     // Validate form data
@@ -64,7 +68,8 @@ const AddProduct = () => {
       dataForm.description.length < 4 ||
       !dataForm.price ||
       !dataForm.category ||
-      !dataForm.image
+      !dataForm.image ||
+      !dataForm.stock
     ) {
       setIsLoading(false);
       setErrors((prevErrors) => ({
@@ -80,6 +85,7 @@ const AddProduct = () => {
         price: !dataForm.price ? "Please enter a price" : "",
         image: !dataForm.image ? "Please provide an image URL" : "",
         category: !dataForm.category ? "Please select a category" : "",
+        stock: !dataForm.stock ? "Please enter stock quantity" : "",
       }));
 
       return;
@@ -88,9 +94,10 @@ const AddProduct = () => {
     const requestData: RequestData = {
       name: dataForm.name,
       description: dataForm.description,
-      price: +dataForm.price,
+      price: parseInt(dataForm.price),
       image: dataForm.image,
       category: dataForm.category,
+      stock: parseInt(dataForm.stock),
     };
 
     try {
@@ -132,7 +139,7 @@ const AddProduct = () => {
           name="price"
           required
           placeholder="Enter Product price"
-          onChange={(e) => setDataForm({ ...dataForm, price: +e.target.value })}
+          onChange={(e) => setDataForm({ ...dataForm, price: e.target.value })}
         />
         {errors.price && <p className="text-red-500">{errors.price}</p>}
 
@@ -177,6 +184,19 @@ const AddProduct = () => {
           onChange={handleImageChange}
         />
         {errors.image && <p className="text-red-500">{errors.image}</p>}
+
+        <label htmlFor="stock">Enter Product Stock</label>
+        <Input
+          value={dataForm.stock}
+          type="number"
+          id="stock"
+          min={0}
+          name="stock"
+          required
+          placeholder="Enter Product stock"
+          onChange={(e) => setDataForm({ ...dataForm, stock: e.target.value })}
+        />
+        {errors.stock && <p className="text-red-500">{errors.stock}</p>}
 
         <Button disabled={isLoading} className="mt-2 bg-green-600">
           Add Product

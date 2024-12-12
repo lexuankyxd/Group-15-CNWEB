@@ -23,6 +23,18 @@ const filteredData = (params: FilterParams, products: Product[]): Product[] => {
           new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
         );
         break;
+      case "name-asc":
+        filtered.sort((a, b) => 
+          a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+        );
+        break;
+      case "name-desc":
+        filtered.sort((a, b) => 
+          b.name.toLowerCase().localeCompare(a.name.toLowerCase())
+        );
+        break;
+      default:
+        break;
     }
   }
 
