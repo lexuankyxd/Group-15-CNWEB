@@ -38,8 +38,6 @@ export const publicApi = {
   },
 
   getCategoryProducts: async (category: string, params?: { 
-    page?: number; 
-    limit?: number;
     priceRange?: string;
   }) => {
     try {
@@ -47,16 +45,16 @@ export const publicApi = {
         throw new Error('Category is required');
       }
       
-      const decodedCategory = decodeURIComponent(category);
+      // Use decodeURI first to ensure we don't have any existing encoding
+      const decodedCategory = decodeURI(category);
+      // Then encode only once
       const encodedCategory = encodeURIComponent(decodedCategory);
-      const queryParams = new URLSearchParams({
-        category: encodedCategory,
-        page: String(params?.page || 1),
-        limit: String(params?.limit || 5),
-        ...(params?.priceRange ? { priceRange: params.priceRange } : {})
-      });
       
-      const res = await axios.get(`${BASE_URL}/products/category?${queryParams}`);
+      const url = `${BASE_URL}/products/category?category=${encodedCategory}${
+        params?.priceRange ? `&priceRange=${params.priceRange}` : ''
+      }`;
+      
+      const res = await axios.get(url);
       
       return {
         products: res.data.products || [],
