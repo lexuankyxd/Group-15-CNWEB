@@ -1,5 +1,6 @@
 import CarouselFeatured from "@/components/CarouselFeatured";
 import { CarouselSpacing } from "@/components/CarouselSpacing";
+import Banner from '@/components/Banner';
 import Footer from "@/components/footer";
 import TitleHeader from "@/components/title-header";
 import { publicApi } from "@/lib/apiCalls";
@@ -20,6 +21,7 @@ const HomePage = async () => {
 
     return (
       <>
+        <Banner />
         <TitleHeader title="Top Category" url="/shop" />
         <CarouselSpacing />
         <div className="mb-24">
