@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const cors = require('cors');
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("./db");
 const customerRoutes = require("./routes/customerRoutes");
@@ -9,13 +9,14 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const orderProcessingRoutes = require("./routes/orderProcessingRoutes.js");
+const reportGenRoutes = require("./routes/reportGenRoutes.js");
 
 const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
 
@@ -42,6 +43,7 @@ app.use("/api/orders", orderRoutes);
 // Xử lý đơn hàng
 app.use("/api/orderProcessing", orderProcessingRoutes);
 
+app.use("/api/reportGen", reportGenRoutes);
 // Chạy server
 app.listen(port, () => {
   console.log(`Server đang chạy trên cổng ${port}`);
