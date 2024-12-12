@@ -42,5 +42,5 @@ exports.updateOrderStatus = async (req, res) => {
 };
 
 exports.refundOrder = (orderId) => {
-  console.log("refuned order: " + orderId);
+  console.log("refunded order: " + orderId);
 };

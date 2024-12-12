@@ -96,35 +96,24 @@ exports.getCustomerById = async (req, res) => {
 };
 
 exports.getAllCustomers = async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
+  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 sản phẩm
+  const skip = (page - 1) * limit;
+
   try {
-    // Check if pagination parameters exist
-    if (req.query.page || req.query.limit) {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = (page - 1) * limit;
-
-      const totalCustomers = await Customer.countDocuments();
-      const totalPages = Math.ceil(totalCustomers / limit);
-      const customers = await Customer.find().skip(skip).limit(limit);
-
-      return res.status(200).json({
-        message: "Danh sách khách hàng",
-        customers,
-        currentPage: page,
-        totalPages,
-        totalCustomers,
-      });
-    }
-
-    // Return all customers if no pagination parameters
-    const customers = await Customer.find();
     const totalCustomers = await Customer.countDocuments();
-    return res.status(200).json({
+    const totalPages = Math.ceil(totalCustomers / limit);
+
+    // Lấy các sản phẩm trong trang hiện tại
+    const customers = await Customer.find().skip(skip).limit(limit);
+
+    res.status(200).json({
       message: "Danh sách khách hàng",
       customers,
+      currentPage: page,
+      totalPages,
       totalCustomers,
     });
-
   } catch (error) {
     console.error("Lỗi khi lấy khách hàng:", error);
     res.status(500).json({ message: "Lỗi hệ thống!" });
