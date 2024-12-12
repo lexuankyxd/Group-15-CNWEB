@@ -16,20 +16,24 @@ const NavbarSearch = () => {
 
   const performSearch = useCallback(async (searchTerm: string) => {
     try {
+      setIsLoading(true);
+      const current = new URLSearchParams(Array.from(searchParams.entries()));
+      
       if (searchTerm.length >= 1) {
-        setIsLoading(true);
-        const current = new URLSearchParams(Array.from(searchParams.entries()));
         current.set("q", searchTerm);
-        await router.replace(`/shop?${current.toString()}`);
       } else {
-        await router.replace("/shop");
+        current.delete("q");
       }
+
+      // Preserve the current path when searching
+      const targetPath = pathname === "/" ? "/shop" : pathname;
+      await router.replace(`${targetPath}?${current.toString()}`);
     } catch (error) {
       console.error('Search error:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [router, searchParams]);
+  }, [router, searchParams, pathname]);
 
   // Memoize the debounced search function
   const debouncedSearch = useMemo(

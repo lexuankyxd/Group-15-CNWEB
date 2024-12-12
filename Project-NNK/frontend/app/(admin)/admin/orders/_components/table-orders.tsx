@@ -10,6 +10,7 @@ import { useAuth } from "@/app/utils/authContext";
 import { createProtectedApi } from "@/lib/apiCalls";
 import { Order } from "@/types";
 import { toast } from "react-hot-toast";
+import formatVND from "@/app/utils/formatCurrency";
 
 const StatusBadge = ({ status }: { status: Order['status'] }) => {
   const getStatusStyles = () => {
@@ -119,7 +120,7 @@ const TableOrders = () => {
               >
                 <TableCell>{order.items.length} items</TableCell>
                 <TableCell className="font-medium">
-                  ${order.totalPrice.toLocaleString()}
+                  {formatVND(order.totalPrice)}
                 </TableCell>
                 <TableCell>{order.shippingAddress}</TableCell>
                 <TableCell>

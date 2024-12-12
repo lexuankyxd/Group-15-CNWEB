@@ -41,7 +41,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
 
       {/* Product Info Section */}
       <div>
-        <p className="font-semibold text-lg">{data.name}</p>
+        <div className="min-h-[4rem]">
+          <p className="font-semibold text-lg">{data.name}</p>
+        </div>
         <p className="text-sm text-gray-500">
           {data.category.charAt(0).toUpperCase() + data.category.slice(1)}
         </p>

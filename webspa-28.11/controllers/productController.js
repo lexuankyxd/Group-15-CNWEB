@@ -179,6 +179,7 @@ exports.findProductsByCategory = async (req, res) => {
         break;
       case "3mTo10m":
         priceFilter = { price: { $gte: 3000000, $lt: 10000000 } }; 
+        break;
       case "10mTo20m":
         priceFilter = { price: { $gte: 10000000, $lt: 20000000 } }; 
         break;

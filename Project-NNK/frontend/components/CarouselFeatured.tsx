@@ -39,7 +39,7 @@ const CarouselFeatured = ({ data }: CarouselFeaturedProps) => {
         {data.map((product) => (
           <CarouselItem
             key={product._id} 
-            className="max-sm:basis-3/4 md:basis-1/2 lg:basis-1/3"
+            className="max-sm:basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5"
           >
             <ProductCard data={product} />
           </CarouselItem>
