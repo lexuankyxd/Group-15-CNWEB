@@ -8,6 +8,7 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const orderProcessingRoutes = require("./routes/orderProcessingRoutes.js");
+const reportGenRoutes = require("./routes/reportGenRoutes.js");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -41,6 +42,7 @@ app.use("/api/orders", orderRoutes);
 // Xử lý đơn hàng
 app.use("/api/orderProcessing", orderProcessingRoutes);
 
+app.use("/api/reportGen", reportGenRoutes);
 // Chạy server
 app.listen(port, () => {
   console.log(`Server đang chạy trên cổng ${port}`);

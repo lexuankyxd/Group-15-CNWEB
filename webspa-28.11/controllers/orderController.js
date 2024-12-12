@@ -42,7 +42,10 @@ exports.createOrder = async (req, res) => {
     if (paymentMethod == "Tiền mặt") newOrder.status = "Chờ xử lý";
     // Lưu đơn hàng vào cơ sở dữ liệu
     await newOrder.save();
-    removeCart(req, res);
+    const deleteCart = await Cart.deleteOne({ userId: userId });
+    if (!deleteCart) {
+      return res.status(404).json({ message: "Giỏ hàng không tồn tại!" });
+    }
     // Nếu bạn muốn xóa giỏ hàng sau khi tạo đơn hàng, có thể xóa giỏ hàng của người dùng ở đây
     // await Cart.findOneAndDelete({ userId });
 

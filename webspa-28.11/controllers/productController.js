@@ -1,10 +1,33 @@
 const Product = require("../models/productModel");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+require("dotenv").config();
 
+const S3_BUCKET = process.env.S3_BUCKET;
+const AWS_REGION = process.env.AWS_REGION;
+const ACCESS_KEY = process.env.ACCESS_KEY;
+const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY;
+const CLOUDFRONT_DIST = process.env.CLOUDFRONT_DIST;
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: ACCESS_KEY,
+    secretAccessKey: SECRET_ACCESS_KEY,
+  },
+  region: AWS_REGION,
+});
 // Thêm sản phẩm mới
 exports.createProduct = async (req, res) => {
-  const { name, description, price, stock, image, category } = req.body;
-
+  const { name, description, price, stock, category } = req.body;
+  var image = Date.now() + "_" + req.file.originalname;
   try {
+    const params = {
+      Bucket: S3_BUCKET,
+      Key: image,
+      Body: req.file.buffer,
+      ContentType: req.file.mimetype,
+    };
+    const command = new PutObjectCommand(params);
+    await s3.send(command);
+    image = CLOUDFRONT_DIST + image;
     const newProduct = new Product({
       name,
       description,
@@ -71,8 +94,8 @@ exports.deleteProduct = async (req, res) => {
 
 // Lấy tất cả sản phẩm với phân trang
 exports.getAllProducts = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; 
-  const limit = parseInt(req.query.limit) || 10; 
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
   try {
@@ -97,8 +120,8 @@ exports.getAllProducts = async (req, res) => {
 
 // Tìm sản phẩm theo từ khóa trong tên
 exports.findProducts = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; 
-  const limit = parseInt(req.query.limit) || 10; 
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
   const keywords = req.body.keywords.split(" ");
   const regexPattern = `\\b(?:${keywords.join("|")})\\b`;
@@ -127,12 +150,12 @@ exports.findProducts = async (req, res) => {
 
 // Tìm sản phẩm theo category và mức giá
 exports.findProductsByCategory = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; 
-  const limit = parseInt(req.query.limit) || 10; 
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const category = req.query.category; 
-  const priceRange = req.query.priceRange; 
+  const category = req.query.category;
+  const priceRange = req.query.priceRange;
 
   if (!category) {
     return res.status(400).json({ message: "Category is required!" });
@@ -147,18 +170,18 @@ exports.findProductsByCategory = async (req, res) => {
         priceFilter = { price: { $lt: 1000000 } };
         break;
       case "1mTo3m":
-        priceFilter = { price: { $gte: 1000000, $lt: 3000000 } }; 
+        priceFilter = { price: { $gte: 1000000, $lt: 3000000 } };
         break;
       case "3mTo10m":
-        priceFilter = { price: { $gte: 3000000, $lt: 10000000 } }; 
+        priceFilter = { price: { $gte: 3000000, $lt: 10000000 } };
       case "10mTo20m":
-        priceFilter = { price: { $gte: 10000000, $lt: 20000000 } }; 
+        priceFilter = { price: { $gte: 10000000, $lt: 20000000 } };
         break;
       case "above20m":
-        priceFilter = { price: { $gte: 20000000 } }; 
+        priceFilter = { price: { $gte: 20000000 } };
         break;
       default:
-        priceFilter = {}; 
+        priceFilter = {};
     }
   }
 

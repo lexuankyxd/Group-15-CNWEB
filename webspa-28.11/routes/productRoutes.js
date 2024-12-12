@@ -8,14 +8,17 @@ const {
   findProductsByCategory,
 } = require("../controllers/productController");
 const { protect, adminProtect } = require("../middleware/authMiddleware"); // Middleware bảo vệ route
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 
 // Route thêm sản phẩm mới
-router.post("/create", adminProtect, createProduct);
+router.post("/create", adminProtect, upload.single("img"), createProduct);
 
 // Route cập nhật sản phẩm
-router.put("/update/:id", adminProtect, updateProduct);
+router.put("/update/:id", adminProtect, upload.single("img"), updateProduct);
 
 // Route xóa sản phẩm
 router.delete("/delete/:id", adminProtect, deleteProduct);
