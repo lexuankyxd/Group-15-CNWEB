@@ -42,9 +42,8 @@ exports.createOrder = async (req, res) => {
     if (paymentMethod == "Tiền mặt") newOrder.status = "Chờ xử lý";
     // Lưu đơn hàng vào cơ sở dữ liệu
     await newOrder.save();
-    removeCart(req, res);
     // Nếu bạn muốn xóa giỏ hàng sau khi tạo đơn hàng, có thể xóa giỏ hàng của người dùng ở đây
-    // await Cart.findOneAndDelete({ userId });
+    await Cart.findOneAndDelete({ userId });
 
     res.status(201).json({
       message: "Đơn hàng đã được tạo thành công!",
@@ -63,26 +62,25 @@ exports.getUserOrders = async (req, res) => {
     // Changed 'user' to 'userId' to match the schema field
     const orders = await Order.find({ userId: userId })
       .sort({ createdAt: -1 }) // Sort by newest first
-      .populate('items.productId', 'name price image'); // Populate product details if needed
-    
+      .populate("items.productId", "name price image"); // Populate product details if needed
+
     if (!orders) {
       return res.status(404).json({
         success: false,
-        message: "Không tìm thấy đơn hàng nào."
+        message: "Không tìm thấy đơn hàng nào.",
       });
     }
 
     return res.status(200).json({
       success: true,
-      orders: orders
+      orders: orders,
     });
-
   } catch (error) {
-    console.error('Error in getUserOrders:', error);
+    console.error("Error in getUserOrders:", error);
     return res.status(500).json({
       success: false,
       message: "Lỗi khi lấy danh sách đơn hàng.",
-      error: error.message
+      error: error.message,
     });
   }
 };
