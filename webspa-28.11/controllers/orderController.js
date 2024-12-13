@@ -112,8 +112,8 @@ exports.getUserOrderDetails = async (req, res) => {
 
 // Lấy tất cả đơn hàng
 exports.getAllOrders = async (req, res) => {
-  const page = parseInt(req.query.page) || 1; // Mặc định là trang 1
-  const limit = parseInt(req.query.limit) || 10; // Mặc định mỗi trang sẽ hiển thị 10 s��n phẩm
+  const page = parseInt(req.query.page) || 0; // Mặc định là trang 1
+  const limit = parseInt(req.query.limit) || 0; // Mặc định mỗi trang sẽ hiển thị 10 s��n phẩm
   const skip = (page - 1) * limit;
 
   try {
