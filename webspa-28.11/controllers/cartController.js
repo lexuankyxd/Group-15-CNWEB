@@ -44,7 +44,7 @@ exports.addToCart = async (req, res) => {
     const formattedItems = populatedCart.items.map(item => ({
       productId: item.productId._id,
       quantity: item.quantity,
-      price: product.price,
+      price: item.productId.price,
       name: item.productId.name,
       category: item.productId.category,
       image: item.productId.image,
