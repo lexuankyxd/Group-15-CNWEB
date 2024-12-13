@@ -121,7 +121,13 @@ exports.getAllOrders = async (req, res) => {
     const totalPages = Math.ceil(totalOrders / limit);
 
     // Lấy các sản phẩm trong trang hiện tại
-    const orders = await Order.find().skip(skip).limit(limit);
+    const orders = await Order.find()
+      .skip(skip)
+      .limit(limit)
+      .sort(() => {
+        return { ["updateAt"]: -1 };
+      })
+      .exec();
 
     res.status(200).json({
       message: "Danh sách đơn hàng",
