@@ -123,11 +123,7 @@ exports.getAllOrders = async (req, res) => {
     // Lấy các sản phẩm trong trang hiện tại
     const orders = await Order.find()
       .skip(skip)
-      .limit(limit)
-      .sort(() => {
-        return { ["updateAt"]: -1 };
-      })
-      .exec();
+      .limit(limit);
 
     res.status(200).json({
       message: "Danh sách đơn hàng",
