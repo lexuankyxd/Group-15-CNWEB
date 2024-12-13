@@ -97,8 +97,8 @@ exports.getAllProducts = async (req, res) => {
   try {
     // Check if pagination parameters exist
     if (req.query.page || req.query.limit) {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      const page = parseInt(req.query.page) || 0;
+      const limit = parseInt(req.query.limit) || 0;
       const skip = (page - 1) * limit;
 
       const totalProducts = await Product.countDocuments();
@@ -177,8 +177,8 @@ exports.findProducts = async (req, res) => {
 
 // Tìm sản phẩm theo category và mức giá
 exports.findProductsByCategory = async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const page = parseInt(req.query.page) || 0;
+  const limit = parseInt(req.query.limit) || 0;
   const skip = (page - 1) * limit;
 
   const category = req.query.category;
